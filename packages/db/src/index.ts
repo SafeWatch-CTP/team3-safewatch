@@ -10,8 +10,7 @@ export {
   Relationship,
   AlertSeverity,
   AlertLifecycleStatus,
-  DeliveryStatus,
-  DeliveryChannel,
   TargetAudience,
+  DeliveryChannel,
+  DeliveryStatus,
 } from "./generated/prisma";
-
