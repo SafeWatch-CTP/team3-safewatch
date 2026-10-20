@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Starter Skeleton",
+  title: "SafeWatch",
   description: "C12 Fall 2026 — every layer exists; the weeks make them deep.",
 };
 
