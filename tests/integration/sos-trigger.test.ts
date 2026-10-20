@@ -1,4 +1,8 @@
-import { beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("../../packages/auth/src/auth", () => ({
+  auth: async () => ({ user: { id: "sos-user" } }),
+}));
 
 describe("SOS alert trigger", () => {
   let prisma: any;
@@ -17,8 +21,6 @@ describe("SOS alert trigger", () => {
     // The PGlite door applies the real migrations when the client is created.
     process.env.PGLITE_DATA_DIR = "memory://";
     delete process.env.DATABASE_URL;
-    process.env.DEV_USER_ID = "sos-user";
-
     const dbModule = await import("@project/db");
     const routeModule = await import("../../apps/web/app/api/v1/alerts/route");
 

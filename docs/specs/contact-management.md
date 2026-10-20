@@ -14,7 +14,7 @@ Users need a personal emergency-contact list so a panic flow can notify trusted 
 - `packages/db/prisma/schema/emergencyContact.prisma`
 
 ## Behavior
-- The server derives the acting user via the dev identity stub (`x-user-id`, `DEV_USER_ID`, or fallback). No endpoint accepts a user id from the client; every query is scoped to the current user.
+- The server derives the acting user from the Auth.js session. No endpoint accepts a user id from the client; every query is scoped to the current user.
 - `GET /api/v1/contacts` returns `200` with the current user's contacts (`id`, `firstName`, `lastName`, `phoneNumber`, `email`, `relationship`, `isPrimary`), primary first, then by last name. A user with no contacts gets `[]`.
 - `POST /api/v1/contacts` creates one emergency contact for the current user and returns `201` with it.
   - The payload is validated with `createEmergencyContactSchema` before creation.
@@ -42,13 +42,13 @@ Users need a personal emergency-contact list so a panic flow can notify trusted 
 
 ## Verify
 - Run `pnpm vitest run tests/integration/contact-create.test.ts`.
-- Manual check with `pnpm dev` running: `POST` a contact with `x-user-id: demo-user`, then `GET /api/v1/contacts` with `x-user-id: demo-user` (contact listed) and with `x-user-id: someone-else` (`[]`). `DELETE` that contact's id as `someone-else` returns `404`; as `demo-user` returns `204`.
+- Manual check with `pnpm dev` running: sign in with GitHub, then create/list contacts in that browser session. Confirm that signed-out API requests return `401`, and that another user's contact id returns `404` when used for `DELETE`.
 
 ## Constraints & decisions
 - Contact ownership is enforced by filtering every query on both the contact id and the current user id; update and delete use `updateMany`/`deleteMany` so a foreign or missing id affects zero rows and maps to `404`.
 - `EmergencyContact` has no unique fields, so adding the same person twice creates two rows; there is no `409` conflict case.
 - `PUT` replaces the whole contact. It does not yet clear other primary contacts when `isPrimary` is true, so it can leave a user with more than one primary contact.
-- The app currently uses the dev identity stub; production authentication remains a future change.
+- Authentication and user identity follow the session contract in [auth](auth.md).
 
 ## Out of scope
 - Partial updates (`PATCH`) are not supported; clients send the full contact to `PUT`.
