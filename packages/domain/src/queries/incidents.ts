@@ -19,6 +19,8 @@ export type IncidentListItem = {
   severity: IncidentSeverity;
   category: IncidentCategory;
   address: string | null;
+  latitude: number;
+  longitude: number;
   createdAt: Date;
 };
 
@@ -111,6 +113,8 @@ export async function listActiveIncidents(
       severity: true,
       category: true,
       address: true,
+      latitude: true,
+      longitude: true,
       createdAt: true,
     },
     orderBy: { createdAt: "desc" },
