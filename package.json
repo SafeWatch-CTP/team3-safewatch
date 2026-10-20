@@ -13,6 +13,7 @@
     "test:integration": "vitest run",
     "test:watch": "vitest",
     "db:migrate": "pnpm --filter @project/migrate dev",
+    "db:seed": "pnpm --filter @project/migrate seed",
     "db:reset": "node -e \"require('fs').rmSync('.pgdata',{recursive:true,force:true})\" && echo \"Restart pnpm dev (db re-initializes + migrations re-apply)\"",
     "db:dev": "pnpm --filter @project/db-server dev",
     "prisma:generate": "pnpm --filter @project/db generate",
