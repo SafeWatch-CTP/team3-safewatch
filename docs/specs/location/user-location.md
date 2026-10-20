@@ -146,6 +146,6 @@ they are disabled, is derived from `status`, not stored.
 ## Out of scope
 - Continuous background tracking and "walk home" mode — no spec yet.
 - Converting an address to coordinates — no spec yet.
-- Showing incidents on the map — no spec yet.
+- Showing incidents on the map — see [incident-map](../incidents/incident-map.md).
 - Using the location in an SOS alert — see [trigger-sos](../alerts/trigger-sos.md).
 - Removing the location when the user goes offline — no spec yet.

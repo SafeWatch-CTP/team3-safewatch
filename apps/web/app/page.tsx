@@ -1,12 +1,29 @@
 import { currentUserId } from "@project/auth";
 import { listActiveIncidents } from "@project/domain";
+import { IncidentMapSection } from "./_components/incident-map-section";
+import { incidentAnchorId } from "./_components/incident-map-model";
 import { LocationPicker } from "./_components/location-picker";
 
 export const dynamic = "force-dynamic";
 
+const INCIDENT_LIST_ID = "incident-list";
+
 export default async function Home() {
   const userId = await currentUserId();
   const incidents = await listActiveIncidents();
+
+  // Only what the map shows crosses to the client.
+  const mapIncidents = incidents.map(
+    ({ id, title, severity, category, address, latitude, longitude }) => ({
+      id,
+      title,
+      severity,
+      category,
+      address,
+      latitude,
+      longitude,
+    })
+  );
 
   return (
     <main className="space-y-8 p-6">
@@ -19,9 +36,19 @@ export default async function Home() {
 
       <LocationPicker />
 
-      <section className="rounded-lg border border-neutral-200 bg-neutral-50 p-6">
+      <IncidentMapSection incidents={mapIncidents} listId={INCIDENT_LIST_ID} />
+
+      {/* tabIndex -1: the skip link moves focus here. */}
+      <section
+        id={INCIDENT_LIST_ID}
+        tabIndex={-1}
+        aria-labelledby="incident-list-heading"
+        className="rounded-lg border border-neutral-200 bg-neutral-50 p-6 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+      >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Latest safety feed</h2>
+          <h2 id="incident-list-heading" className="text-lg font-semibold">
+            Latest safety feed
+          </h2>
           <a href="/api/health" className="text-sm text-blue-600 underline">
             Health check
           </a>
@@ -32,9 +59,12 @@ export default async function Home() {
             <p className="text-neutral-600">No active incidents right now.</p>
           ) : (
             incidents.map((incident) => (
+              // tabIndex -1: a map popup's "Show in list" link moves focus here.
               <article
                 key={incident.id}
-                className="rounded border border-neutral-200 bg-white p-4 shadow-sm"
+                id={incidentAnchorId(incident.id)}
+                tabIndex={-1}
+                className="rounded border border-neutral-200 bg-white p-4 shadow-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
               >
                 <div className="mb-2 flex items-center justify-between gap-4">
                   <h3 className="font-semibold">{incident.title}</h3>
