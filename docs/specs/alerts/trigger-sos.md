@@ -51,10 +51,9 @@ message or choosing recipients under stress.
 
 ## Verify
 - Run `pnpm vitest run tests/integration/sos-trigger.test.ts`.
-- Manual check with `pnpm dev` running and a seeded user who has at least one
-  contact:
-  `curl -X POST localhost:3000/api/v1/alerts -H "content-type: application/json" -H "x-user-id: <id>" -d '{"latitude":40.7128,"longitude":-74.006}'`
-  returns `201` and one log per contact.
+- Manual check with `pnpm dev` running and an authenticated user who has at
+  least one contact: submit an SOS using the browser session and confirm a
+  `201` response with one log per contact. A signed-out request returns 401.
 
 ## Constraints & decisions
 - The route records delivery intent only (`PENDING` logs); it does not send

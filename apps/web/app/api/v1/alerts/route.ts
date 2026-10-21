@@ -1,4 +1,4 @@
-import { currentUserId } from "@project/auth";
+import { AuthenticationRequiredError, currentUserId } from "@project/auth";
 import { NoEmergencyContactsError, triggerSosAlert, triggerSosAlertSchema } from "@project/domain";
 
 export const dynamic = "force-dynamic";
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
     console.error("sos-trigger-error", error);
 
-    if (error instanceof Error && error.message.includes("Dev identity stub is disabled")) {
+    if (error instanceof AuthenticationRequiredError) {
       return Response.json(
         { error: { code: "UNAUTHORIZED", message: "Authentication is required." } },
         { status: 401 }

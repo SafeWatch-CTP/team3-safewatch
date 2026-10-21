@@ -1,5 +1,9 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("../../packages/auth/src/auth", () => ({
+  auth: async () => ({ user: { id: "location-user" } }),
+}));
+
 // Upstash has no local stand-in (ADR-0012), so @project/redis is replaced with
 // an in-memory fake: one location per user, like GEOADD on a single key.
 const store = vi.hoisted(() => ({
@@ -34,7 +38,6 @@ describe("user location", () => {
   beforeAll(async () => {
     process.env.PGLITE_DATA_DIR = "memory://";
     delete process.env.DATABASE_URL;
-    process.env.DEV_USER_ID = "location-user";
 
     PUT = (await import("../../apps/web/app/api/v1/location/route")).PUT;
   });
