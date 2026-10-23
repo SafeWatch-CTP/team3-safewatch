@@ -102,6 +102,7 @@ have the shape `{ error: { code, message } }`.
 - Writing incidents into the Redis index and removing resolved ones — worker
   behavior, no spec yet.
 - The city-wide active incident feed on the home page
-  (`listActiveIncidents`) — no spec yet.
+  (`listActiveIncidents`) — no spec yet; the street map drawn from it is
+  [incident-map](incident-map.md).
 - Sending alerts for an incident — see [trigger-sos](../alerts/trigger-sos.md)
   for user-triggered alerts; incident-driven alerts have no spec yet.

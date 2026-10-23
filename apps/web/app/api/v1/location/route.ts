@@ -12,7 +12,7 @@
  * Spec: docs/specs/location/user-location.md
  */
 
-import { currentUserId } from "@project/auth";
+import { AuthenticationRequiredError, currentUserId } from "@project/auth";
 import { saveUserLocation, updateLocationSchema } from "@project/domain";
 
 export const dynamic = "force-dynamic";
@@ -50,7 +50,7 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error("location-update-error", error);
 
-    if (error instanceof Error && error.message.includes("Dev identity stub is disabled")) {
+    if (error instanceof AuthenticationRequiredError) {
       return Response.json(
         { error: { code: "UNAUTHORIZED", message: "Authentication is required." } },
         { status: 401 }

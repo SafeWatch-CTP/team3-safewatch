@@ -11,7 +11,8 @@
  *      - Looks up one incident by its ID, for the detail view when a user taps a pin.
  * 
  * 3. listActiveIncidents(input)
- *      - Lists active incidents across the whole city, most severe first, for the home page.
+ *      - Lists active incidents across the whole city, most severe first, for the home page
+ *        feed and the map above it (each item carries its coordinates).
  *
  */
 
@@ -34,6 +35,8 @@ export type IncidentListItem = {
   severity: IncidentSeverity;
   category: IncidentCategory;
   address: string | null;
+  latitude: number;
+  longitude: number;
   createdAt: Date;
 };
 
@@ -106,6 +109,8 @@ export async function listActiveIncidents(
       severity: true,
       category: true,
       address: true,
+      latitude: true,
+      longitude: true,
       createdAt: true,
     },
     orderBy: { createdAt: "desc" },
