@@ -1,5 +1,8 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+const { authMock } = vi.hoisted(() => ({ authMock: vi.fn() }));
+vi.mock("../../packages/auth/src/auth", () => ({ auth: authMock }));
+
 // The nearby route asks Redis which incident ids are in range. Tests have no
 // Redis, so the spatial lookup is replaced; Postgres (PGlite) stays real.
 const { getIncidentIdsInRadius } = vi.hoisted(() => ({ getIncidentIdsInRadius: vi.fn() }));
@@ -39,9 +42,27 @@ describe("incident routes", () => {
   beforeEach(async () => {
     await prisma.incident.deleteMany();
     getIncidentIdsInRadius.mockReset();
+    authMock.mockReset();
+    authMock.mockResolvedValue({ user: { id: "incident-user" } });
   });
 
   describe("GET /api/v1/incidents/nearby", () => {
+    it("requires a session before searching for incidents", async () => {
+      authMock.mockResolvedValueOnce(null);
+      const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+      try {
+        const response = await nearby("?latitude=40.71&longitude=-74.00");
+
+        expect(response.status).toBe(401);
+        expect(await response.json()).toEqual({
+          error: { code: "UNAUTHORIZED", message: "Authentication is required." },
+        });
+        expect(getIncidentIdsInRadius).not.toHaveBeenCalled();
+      } finally {
+        logged.mockRestore();
+      }
+    });
+
     it("returns in-range incidents as pins, nearest first", async () => {
       const far = await createIncident("Far");
       const near = await createIncident("Near");
@@ -115,6 +136,22 @@ describe("incident routes", () => {
   });
 
   describe("GET /api/v1/incidents/[id]", () => {
+    it("requires a session before returning incident details", async () => {
+      const incident = await createIncident("Private to signed-in users");
+      authMock.mockResolvedValueOnce(null);
+      const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+      try {
+        const response = await byId(incident.id);
+
+        expect(response.status).toBe(401);
+        expect(await response.json()).toEqual({
+          error: { code: "UNAUTHORIZED", message: "Authentication is required." },
+        });
+      } finally {
+        logged.mockRestore();
+      }
+    });
+
     it("returns the incident with its timeline updates and alerts", async () => {
       const incident = await createIncident("Warehouse fire");
       await prisma.incidentUpdate.create({

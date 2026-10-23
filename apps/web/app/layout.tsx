@@ -5,7 +5,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "SafeWatch",
-  description: "C12 Fall 2026 — every layer exists; the weeks make them deep.",
+  description: "Stay connected to local safety alerts and emergency support.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

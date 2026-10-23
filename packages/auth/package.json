@@ -5,12 +5,25 @@
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./auth": {
+      "types": "./src/auth.ts",
+      "default": "./src/auth.ts"
+    }
+  },
   "scripts": {
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "next": "15.5.21"
+    "@auth/prisma-adapter": "2.11.0",
+    "@project/db": "workspace:*",
+    "next": "15.5.21",
+    "next-auth": "5.0.0-beta.30"
   },
   "devDependencies": {
     "vitest": "^4.0.0"

@@ -1,8 +1,7 @@
 # @project/auth — identity / auth
 
-The "who is the current user?" logic. Currently a deliberately naive dev stub.
-In Week 8 it's replaced with real authentication shared across the web app
-and the worker.
+GitHub OAuth and session-derived identity for the web app. Auth.js uses
+database-backed sessions through the Prisma adapter.
 
 ## Public API
 
@@ -10,30 +9,26 @@ All exports come from `src/index.ts`:
 
 | Export | What it does |
 |---|---|
-| `currentUserId()` | Returns the current user's ID. Reads from `x-user-id` request header, then `DEV_USER_ID` env var, then falls back to `demo-user`. |
+| `currentUserId()` | Returns the session user id or throws `AuthenticationRequiredError`. |
+| `AuthenticationRequiredError` | Identifies unauthenticated access for API error mapping. |
+| `getVerifiedGitHubEmail(accessToken)` | Retrieves GitHub's verified primary email for safe account matching. |
+
+The Auth.js handlers are exported from `src/auth.ts` and mounted at
+`/api/auth/[...nextauth]`.
 
 ## Dependencies
 
-- `next` — for `next/headers` (the dev stub reads the HTTP request's headers)
+- `next`
+- `next-auth`
+- `@auth/prisma-adapter`
+- `@project/db`
+
+## Configuration
+
+Set `GITHUB_ID`, `GITHUB_SECRET`, and `AUTH_SECRET`; local development also
+sets `AUTH_TRUST_HOST=true`. The GitHub OAuth callback URL is
+`http://localhost:3000/api/auth/callback/github`.
 
 ## Consumers
 
-- `apps/web` — via `@project/auth`
-
-## The dev stub
-
-```ts
-currentUserId()
-  1. x-user-id request header (if present)
-  2. DEV_USER_ID env var (if set)
-  3. "demo-user" (created by the seed script)
-```
-
-In development, this trusts the client to say who they are. That's intentional.
-Week 8 replaces it with real auth (OAuth, JWTs, middleware) that works for both
-the web app and the worker.
-
-## Disabled in production
-
-The dev stub throws if `NODE_ENV === "production"` unless `ALLOW_DEV_IDENTITY` is
-set. Real auth in Week 8 removes this guard.
+- `apps/web` — OAuth routes and session-scoped API identity.

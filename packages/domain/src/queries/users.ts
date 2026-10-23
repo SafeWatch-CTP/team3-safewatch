@@ -1,5 +1,5 @@
 import { prisma } from "@project/db";
-import type { RegisterUserInput } from "../zod_schemas/users";
+import type { CompleteUserProfileInput, RegisterUserInput } from "../zod_schemas/users";
 import { createHash } from "node:crypto";
 
 export function hashPassword(password: string) {
@@ -77,3 +77,18 @@ export async function updateProfile(
             data,
         });
     }
+
+export async function completeUserProfile(
+        userId: string,
+        input: CompleteUserProfileInput,
+) {
+        const result = await prisma.user.updateMany({
+            where: { id: userId },
+            data: {
+                name: input.name,
+                phoneNumber: input.phoneNumber,
+            },
+        });
+
+        return result.count === 1;
+}

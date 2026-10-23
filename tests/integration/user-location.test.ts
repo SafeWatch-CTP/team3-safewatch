@@ -1,5 +1,10 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+const { authMock } = vi.hoisted(() => ({ authMock: vi.fn() }));
+vi.mock("../../packages/auth/src/auth", () => ({
+  auth: authMock,
+}));
+
 // Upstash has no local stand-in (ADR-0012), so @project/redis is replaced with
 // an in-memory fake: one location per user, like GEOADD on a single key.
 const store = vi.hoisted(() => ({
@@ -34,7 +39,6 @@ describe("user location", () => {
   beforeAll(async () => {
     process.env.PGLITE_DATA_DIR = "memory://";
     delete process.env.DATABASE_URL;
-    process.env.DEV_USER_ID = "location-user";
 
     PUT = (await import("../../apps/web/app/api/v1/location/route")).PUT;
   });
@@ -42,6 +46,24 @@ describe("user location", () => {
   beforeEach(() => {
     store.locations.clear();
     store.fail = false;
+    authMock.mockReset();
+    authMock.mockResolvedValue({ user: { id: "location-user" } });
+  });
+
+  it("requires a session and stores no location when signed out", async () => {
+    authMock.mockResolvedValueOnce(null);
+    const logged = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const response = await put({ latitude: 40.7128, longitude: -74.006 });
+
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({
+        error: { code: "UNAUTHORIZED", message: "Authentication is required." },
+      });
+      expect(store.locations.size).toBe(0);
+    } finally {
+      logged.mockRestore();
+    }
   });
 
   it("stores the current user's coordinates and returns them", async () => {

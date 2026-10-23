@@ -3,12 +3,6 @@ type: feature
 ---
 # A user can share their location from the device or by entering coordinates
 
-> **Interim behavior — no user check.** Until user accounts are in place, the
-> route saves a location for whatever user id the identity seam returns,
-> without checking that a matching user exists. When accounts land, an
-> unknown id returns `401` and nothing is written; that change updates this
-> spec.
-
 ## Why
 The map, the SOS alert, and the nearby-incident search all need to know where
 the user is. The device's location is the fastest source, but permission can
@@ -51,9 +45,8 @@ any of those situations can still type in their coordinates and use the app.
   user) and returns `200` with `{ latitude, longitude }`.
 - Validation failures and malformed JSON return `400` `VALIDATION_ERROR`
   with `{ error: { code, message } }`, and nothing is written.
-- The location is stored under the id the identity seam returns, whether or
-  not a matching user exists (see the interim note above). Signed-out calls
-  return `401`.
+- The location is stored under the authenticated session user's id. The
+  client cannot choose the user id; signed-out calls return `401`.
 - The store is Upstash Redis (see
   [ADR-0012](../../adr/0012-upstash-redis-cloud-dependency.md)). If Upstash is
   unreachable or unconfigured, the route returns `500` `INTERNAL_ERROR`. Raw
@@ -101,7 +94,7 @@ they are disabled, is derived from `status`, not stored.
 | `{ latitude: 90, longitude: -180 }` | 200 (boundaries are inclusive) |
 | `{ latitude: "40.7", longitude: 0 }` | 400 `VALIDATION_ERROR` (no coercion) |
 | Body is not JSON | 400 `VALIDATION_ERROR` |
-| `x-user-id: someone-else` (no such user) | 200; location stored under `someone-else` (interim, no user check) |
+| Signed-out request | 401; no location is written |
 | Upstash env vars unset | 500 `INTERNAL_ERROR`; generic message only |
 | Dev server stopped, user clicks save | Error state with "Couldn't reach the server"; retry works once the server is back |
 | Second save | Replaces the first; only one location per user is stored |
@@ -109,14 +102,12 @@ they are disabled, is derived from `status`, not stored.
 ## Verify
 - `pnpm vitest run tests/integration/user-location.test.ts` (uses an
   in-memory fake for `@project/redis`; no Upstash account needed).
-- With `pnpm dev` running and `UPSTASH_REDIS_REST_URL` /
-  `UPSTASH_REDIS_REST_TOKEN` set:
-  - `curl -X PUT localhost:3000/api/v1/location -H "content-type: application/json" -d '{"latitude":40.7128,"longitude":-74.006}'`
-    returns `200`.
-  - The same call with `{"latitude":91,"longitude":0}` and with body `{bad`
-    returns `400` `VALIDATION_ERROR` both times.
-  - With `-H "x-user-id: someone-else"` it returns `200` (interim, no user
-    check).
+- With `pnpm dev` running, a signed-in browser session, and
+  `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` set:
+  - Submit a location in the browser; the route returns `200`.
+  - Submitting `{"latitude":91,"longitude":0}` and malformed JSON returns
+    `400` `VALIDATION_ERROR`.
+  - A signed-out call returns `401`.
 - In the browser: allow location once and deny it once (reset the site
   permission between runs); trigger every arrow in **UI states**; stop the
   dev server and save to confirm the error state and retry.
@@ -124,9 +115,8 @@ they are disabled, is derived from `status`, not stored.
   without a mouse.
 
 ## Constraints & decisions
-- The route does not check that the current user exists, so the feature
-  works before user accounts do. Any id the identity seam returns gets a
-  location; adding the check is a behavior change to this spec.
+- The route uses the Auth.js database session as the source of identity;
+  client-supplied user ids are never accepted.
 - Locations are stored in Upstash Redis, the one cloud dependency without a
   local stand-in; see [ADR-0012](../../adr/0012-upstash-redis-cloud-dependency.md).
 - The location prompt is tied to a user click because browsers penalize
