@@ -45,11 +45,11 @@ function People() {
 }
 
 const services: {label: string; icon: ReactNode; href: string; aria: string; circle: string}[] = [
-    {label: "EMS", icon: <MedicalCross />, href: "tel:211", aria: "Call EMS",
+    {label: "EMS", icon: <MedicalCross />, href: "tel:911", aria: "Call EMS",
         circle: "border-emerald-300/70 bg-emerald-50 text-emerald-600"},
-    {label: "Police", icon: <Shield />, href: "tel:211", aria: "Call police",
+    {label: "Police", icon: <Shield />, href: "tel:911", aria: "Call police",
         circle: "border-sky-300/70 bg-sky-50 text-sky-600"},
-    {label: "Fire", icon: <Flame />, href: "tel:211", aria: "Call fire department",
+    {label: "Fire", icon: <Flame />, href: "tel:911", aria: "Call fire department",
         circle: "border-orange-300/70 bg-orange-50 text-orange-600"},
     {label: "Contacts", icon: <People />, href: "/contacts", aria: "Open emergency contacts",
         circle: "border-accent/30 bg-tint text-accent-deep"},
