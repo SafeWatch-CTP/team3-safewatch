@@ -19,6 +19,10 @@ export const CreateEmergencyContactSchema = z.object({
     .trim()
     .max(20, "Phone number must be 20 characters or fewer.")
     .refine((value) => {
+      // Letters are rejected before the digits are counted: stripping first
+      // would reduce "abc5551234567" to ten digits and let it through.
+      // Allowed is what people actually type, plus a leading country code.
+      if (!/^\+?[\d\s().-]+$/.test(value)) return false;
       // Digits only, so (561) 309-3489 and 5613093489 are the same number.
       // 11 digits is allowed when it is the US country code: +1 561 309 3489.
       const digits = value.replace(/\D/g, "");
