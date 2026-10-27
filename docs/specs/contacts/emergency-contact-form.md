@@ -81,7 +81,7 @@ dials. Keyboard and pointer reach the same two actions.
 |---|---|---|
 | First name | required, 1–30 characters after trimming | empty, only spaces, or over 30 characters |
 | Last name | required, 1–30 characters after trimming | empty, only spaces, or over 30 characters |
-| Phone number | required; 10 digits, or 11 when the first is `1`, after every non-digit is stripped; 20 characters maximum | any other number of digits, letters, or over 20 characters |
+| Phone number | required; digits, spaces and `( ) . -`, with an optional leading `+`; 10 digits, or 11 when the first is `1`, after every non-digit is stripped; 20 characters maximum | letters or any other character, any other number of digits, or over 20 characters |
 | Email | optional; a valid email address when filled in | filled in and not a valid email address |
 | Relationship | optional; one of Parent, Spouse, Sibling, Friend, Other | never: the dropdown offers only these values, and an unselected dropdown is sent as absent |
 | Primary contact | optional; defaults to off | never |
@@ -122,9 +122,11 @@ stateDiagram-v2
     ready --> [*]: close the sheet without saving
 ```
 
-The API also answers `401`, but the dev identity stub always resolves a user
-outside production, so no signed-out state is reachable from this screen and
-none is drawn. It arrives with real auth — see [auth.md](../auth.md).
+**Signed out.** Identity comes from the Auth.js session — see
+[auth.md](../auth.md). A visitor with no session, or one whose session has
+expired, is redirected to the landing page, which is where signing in happens.
+The screen is never drawn without a user, so no signed-out state appears in the
+diagram above. The API answers the same case with `401`.
 
 ## Examples
 
@@ -135,6 +137,9 @@ none is drawn. It arrives with real auth — see [auth.md](../auth.md).
 | Phone `123` | `400`; "Enter a 10-digit US phone number." above the fields, typed values kept |
 | Phone `+1 (555) 000-0099` | `201`; 11 digits with a leading `1` is a US number |
 | Phone `+44 555 000 0099` | `400`; only US numbers are accepted |
+| Phone `abc5551234567` | `400`; letters are rejected before the digits are counted, so ten digits hidden in a word do not pass |
+| Phone `561-309-3489 ext 4` | `400`; an extension is not part of the number |
+| Signed out, open `/contacts` | Redirected to the landing page to sign in; the page is never rendered without a user |
 | First name of 31 characters | `400`; "First name must be 30 characters or fewer." |
 | Email left blank | `201`; email is optional and stored as empty |
 | Email `not-an-address` | `400`; "Enter a valid email address." |
@@ -159,6 +164,9 @@ none is drawn. It arrives with real auth — see [auth.md](../auth.md).
 - `curl -s -X POST localhost:3000/api/v1/contacts -H 'Content-Type:
   application/json' -d '{"firstName":"A","lastName":"B","phoneNumber":"123"}'`
   returns `400` with `{ error: { code, message } }`.
+- **Signed-out drill.** Sign out, then open `/contacts` directly. The landing
+  page must appear. A 500, or the screen rendering with an empty list, is the
+  defect this drill exists to catch.
 - **Keyboard-only pass.** Reach and operate every control on `/contacts` with
   Tab and Enter alone — tabs, Edit, each row in edit mode, each call button,
   the form, the sheet's close. Every stop shows a visible focus outline, and
