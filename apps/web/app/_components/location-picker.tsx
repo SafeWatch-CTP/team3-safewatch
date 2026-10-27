@@ -8,6 +8,7 @@ import {
   type Coordinates,
   type DeviceLocationFailure,
 } from "./device-location";
+import { putLocation } from "./location-request";
 
 // One status instead of several booleans, so "saving" and "error" can't both
 // be true. The diagram is in docs/specs/location/user-location.md (UI states).
@@ -26,27 +27,6 @@ const SOURCE_LABELS: Record<Source, string> = {
   manual: "Using the location you entered",
 };
 
-type SaveResult = { ok: true; location: Coordinates } | { ok: false; message: string };
-
-async function putLocation(coordinates: Coordinates): Promise<SaveResult> {
-  let response: Response;
-  try {
-    response = await fetch("/api/v1/location", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(coordinates),
-    });
-  } catch {
-    return { ok: false, message: "Couldn't reach the server. Check your connection and try again." };
-  }
-
-  const body = await response.json().catch(() => null);
-  if (response.ok && body) {
-    return { ok: true, location: body };
-  }
-  return { ok: false, message: body?.error?.message ?? "Something went wrong. Try again." };
-}
-
 // An empty field must not become 0, so it is sent to the schema as NaN.
 function toNumber(value: string) {
   return value.trim() === "" ? Number.NaN : Number(value);
@@ -62,19 +42,28 @@ export function LocationPicker() {
 
   // A device lookup the user walked away from must not overwrite later state.
   const locateRequest = useRef(0);
+  // Set synchronously, so a second click or Enter that lands before React
+  // re-renders (and disables the button) still can't send a second PUT.
+  const saveInFlight = useRef(false);
 
   async function save(coordinates: Coordinates, source: Source) {
+    if (saveInFlight.current) return;
+    saveInFlight.current = true;
     setAttempt({ coordinates, source });
     setMessage(null);
     setStatus("saving");
 
-    const result = await putLocation(coordinates);
-    if (result.ok) {
-      setSaved({ coordinates: result.location, source });
-      setStatus("saved");
-    } else {
-      setMessage(result.message);
-      setStatus("error");
+    try {
+      const result = await putLocation(coordinates);
+      if (result.ok) {
+        setSaved({ coordinates: result.location, source });
+        setStatus("saved");
+      } else {
+        setMessage(result.message);
+        setStatus("error");
+      }
+    } finally {
+      saveInFlight.current = false;
     }
   }
 
@@ -117,6 +106,11 @@ export function LocationPicker() {
   }
 
   const busy = status === "locating" || status === "saving";
+  // A typed location stays on screen while it saves and after it fails, so
+  // the user can fix it or resubmit without retyping.
+  const showForm =
+    status === "manual" ||
+    (attempt?.source === "manual" && (status === "saving" || status === "error"));
 
   return (
     <section
@@ -141,7 +135,7 @@ export function LocationPicker() {
         )}
       </div>
 
-      {status === "manual" && (
+      {showForm && (
         <form onSubmit={submitManual} noValidate className="space-y-3">
           <div className="flex flex-wrap gap-4">
             <label className="flex flex-col text-sm">
@@ -169,9 +163,10 @@ export function LocationPicker() {
           </div>
           <button
             type="submit"
-            className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white"
+            disabled={status === "saving"}
+            className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
           >
-            Save location
+            {status === "saving" ? "Saving…" : "Save location"}
           </button>
         </form>
       )}
@@ -187,7 +182,7 @@ export function LocationPicker() {
             Use my location
           </button>
         )}
-        {status !== "manual" && !(status === "saved" && saved?.source === "manual") && (
+        {!showForm && !(status === "saved" && saved?.source === "manual") && (
           <button
             type="button"
             onClick={enterManually}
@@ -197,7 +192,8 @@ export function LocationPicker() {
             {status === "locating" ? "Enter coordinates instead" : "Enter coordinates"}
           </button>
         )}
-        {status === "error" && attempt && (
+        {/* A manual attempt retries through the form, which still holds it. */}
+        {status === "error" && attempt?.source === "device" && (
           <button
             type="button"
             onClick={() => save(attempt.coordinates, attempt.source)}

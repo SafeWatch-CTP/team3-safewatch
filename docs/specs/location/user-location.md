@@ -12,6 +12,8 @@ any of those situations can still type in their coordinates and use the app.
 ## Where it lives
 - `apps/web/app/api/v1/location/route.ts` (`PUT`)
 - `apps/web/app/_components/location-picker.tsx` (client component)
+- `apps/web/app/_components/location-request.ts` (`putLocation`, the save
+  request with its timeout)
 - `apps/web/app/_components/device-location.ts` (`getDeviceLocation`, the
   browser Geolocation wrapper reused by the SOS button and the map)
 - `packages/domain/src/zod_schemas/location.ts` (`updateLocationSchema`)
@@ -57,6 +59,15 @@ any of those situations can still type in their coordinates and use the app.
 - The component shows the server's `error.message` when a save fails. A
   network failure (no response at all) shows "Couldn't reach the server" and
   lets the user retry. No state leaves the user stuck without a way forward.
+- A save that gets no answer within 10 seconds is abandoned and shows "The
+  server took too long to answer". Saving never lasts forever.
+- Entered coordinates stay in the form while they save and after a save
+  fails. The submit button reads "Saving…" and is disabled while the save is
+  in flight; after a failure the user fixes or resubmits the same values
+  without retyping. A failed device save offers a "Retry" button instead.
+- One click, one save: a second click or Enter press while a save is in
+  flight sends nothing, even if it lands before the button re-renders as
+  disabled.
 
 ## UI states
 
@@ -73,8 +84,10 @@ stateDiagram-v2
   saving --> saved: 200
   saving --> error: 400 / 401 / 500 (server message)
   saving --> error: network failure
-  error --> saving: retry
-  error --> manual: edit coordinates
+  saving --> error: no answer within 10 s
+  saving --> saving: second click / Enter (ignored)
+  error --> saving: retry (device) / resubmit form (manual)
+  error --> manual: click "Enter coordinates" after a device failure
   saved --> locating: switch to device
   saved --> manual: switch to manual
 ```
@@ -82,6 +95,15 @@ stateDiagram-v2
 The component holds a single `status` value rather than separate booleans, so
 "saving" and "error" cannot be true at once. Which buttons show, and whether
 they are disabled, is derived from `status`, not stored.
+
+| Status | What the user sees |
+|---|---|
+| idle | "Use my location" and "Enter coordinates" |
+| locating | "Finding your location…" and "Enter coordinates instead" |
+| manual | The latitude/longitude form and "Use my location" |
+| saving | "Saving your location…"; a manual save keeps the form with a disabled "Saving…" button |
+| saved | The source in use and the coordinates, plus a button to switch source |
+| error | The message in red; a manual save keeps the form with the typed values, a device save shows "Retry" |
 
 ## Examples
 
@@ -96,12 +118,16 @@ they are disabled, is derived from `status`, not stored.
 | Body is not JSON | 400 `VALIDATION_ERROR` |
 | Signed-out request | 401; no location is written |
 | Upstash env vars unset | 500 `INTERNAL_ERROR`; generic message only |
-| Dev server stopped, user clicks save | Error state with "Couldn't reach the server"; retry works once the server is back |
+| Dev server stopped, user clicks save | Error state with "Couldn't reach the server"; the typed coordinates are still in the form; resubmitting works once the server is back |
+| Server accepts the request but never answers | After 10 s: "The server took too long to answer"; typed coordinates kept |
+| Double-click "Save location", or Enter twice | One `PUT` (one row in the Network tab) |
 | Second save | Replaces the first; only one location per user is stored |
 
 ## Verify
 - `pnpm vitest run tests/integration/user-location.test.ts` (uses an
   in-memory fake for `@project/redis`; no Upstash account needed).
+- `pnpm vitest run tests/unit/location-request.test.ts`: the save request's
+  timeout, network failure, server message and non-JSON error body.
 - With `pnpm dev` running, a signed-in browser session, and
   `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` set:
   - Submit a location in the browser; the route returns `200`.
@@ -110,7 +136,10 @@ they are disabled, is derived from `status`, not stored.
   - A signed-out call returns `401`.
 - In the browser: allow location once and deny it once (reset the site
   permission between runs); trigger every arrow in **UI states**; stop the
-  dev server and save to confirm the error state and retry.
+  dev server and save to confirm the error state keeps the typed values and
+  resubmitting works once it is back.
+- Double-click "Save location", then press Enter twice in a field: the
+  Network tab shows one `PUT` each time.
 - Keyboard only: reach the manual form, fill both fields, and submit
   without a mouse.
 
