@@ -4,8 +4,9 @@
 
 import { prisma } from "@project/db";
 
-// Matches the FALLBACK id in @project/auth's dev identity stub, so the user
-// handed out by currentUserId() exists before anyone can log in (week 8).
+// A fixture user for local work and the starter rows below. Nothing hands it
+// out any more: currentUserId() reads the Auth.js session, so a signed-in
+// GitHub account owns its own rows and will not see this user's.
 const DEMO_USER_ID = "demo-user";
 
 async function main() {

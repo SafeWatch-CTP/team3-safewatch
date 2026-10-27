@@ -32,7 +32,6 @@ model User {
     sessions Session[]
     emergencyContacts EmergencyContact[] //User's emergency contacts
     alertLogs AlertLog[] //History of panic alerts fired by user
-    incidents Incident[] //Back Relation: incidents this user reported
 
     //Timestamps
     createdAt DateTime @default(now()) //Automatically records the date/time a record was first created

@@ -43,11 +43,6 @@ model Incident {
     title String
     
     //Relational Mapping
-    //The reporter. The column exists in the database since
-    //20260916042543_add_user_id_to_incidents; this field is the model catching up.
-    userId String //Foreign key, stores copied id string to link tables
-    user User @relation(fields: [userId], references: [id])
-
     category IncidentCategory @default(UNCATEGORIZED)
     description String? @db.Text //Allows table column to store unlimited text size without crashing
     status IncidentStatus @default(ACTIVE) //Auto-populates live-incidents on map
