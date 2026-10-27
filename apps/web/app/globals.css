@@ -66,3 +66,43 @@
   from { translate: 0 40vh; scale: 0.2; opacity: 0; }
   to { translate: 0 0; scale: 1; opacity: 1; }
 }
+
+/* Incident map (docs/specs/incidents/incident-map.md). Leaflet's own focus
+   styling isn't relied on: every focusable part of the map gets a ring. */
+.incident-map:focus-visible,
+.incident-map a:focus-visible,
+.incident-map .incident-pin:focus-visible,
+.incident-map .incident-popup__title:focus-visible {
+  outline: 3px solid #111827;
+  outline-offset: 2px;
+}
+
+.incident-map .incident-pin {
+  border-radius: 9999px;
+}
+
+.incident-pin__dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border: 2px solid #fff;
+  border-radius: 9999px;
+  /* White border plus a dark edge keeps the pin visible on any tile. */
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 0.5), 0 1px 3px rgb(0 0 0 / 0.4);
+  color: #fff;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* The pin's accessible name: read by screen readers, not shown. */
+.incident-pin__name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

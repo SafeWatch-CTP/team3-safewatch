@@ -1,4 +1,8 @@
-import { beforeAll, describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+
+vi.mock("../../packages/auth/src/auth", () => ({
+  auth: async () => ({ user: { id: "contact-user" } }),
+}));
 
 describe("emergency contacts creation", () => {
   let prisma: any;
@@ -7,16 +11,11 @@ describe("emergency contacts creation", () => {
   beforeAll(async () => {
     process.env.PGLITE_DATA_DIR = "memory://";
     delete process.env.DATABASE_URL;
-    process.env.DEV_USER_ID = "contact-user";
-
     const dbModule = await import("@project/db");
     const routeModule = await import("../../apps/web/app/api/v1/contacts/route");
 
     prisma = dbModule.prisma;
     POST = routeModule.POST;
-
-    // The PGlite test door applies the real migrations when the client opens
-    // (packages/db/src/client.ts), so the schema already exists here.
 
     await prisma.user.deleteMany();
     await prisma.user.create({

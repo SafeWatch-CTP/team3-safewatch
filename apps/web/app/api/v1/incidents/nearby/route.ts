@@ -25,7 +25,7 @@
  *    Full details for ONE incident live in /api/v1/incidents/[id]
  *
  */
-import {currentUserId} from "@project/auth";
+import { AuthenticationRequiredError, currentUserId } from "@project/auth";
 import {ListNearbyIncidentsSchema, listNearbyIncidents} from "@project/domain";
 export const dynamic = "force-dynamic";
 
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
     } catch (error) {
         console.error("incident-nearby-error", error);
 
-        if (error instanceof Error && error.message.includes("Dev identity stub is disabled")) {
+        if (error instanceof AuthenticationRequiredError) {
             return Response.json(
                 {error: {code: "UNAUTHORIZED", message: "Authentication is required."}},
                 {status: 401}

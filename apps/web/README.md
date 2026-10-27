@@ -2,16 +2,17 @@
 
 The user-facing web application. A Next.js server-rendered React app.
 
-**Boilerplate:** the home page shows a welcome message and a health-check link.
-Example branches add their own pages, API routes, and Client Components.
+The web app provides GitHub sign-in, authenticated pages, profile completion,
+and API routes.
 
 ## Public surface
 
-All public routes are defined under `app/api/`:
+Public routes include the landing page, Auth.js callbacks, and health check:
 
 | Route | Method | Purpose |
 |---|---|---|
-| `/` | GET | Home page — boilerplate welcome message |
+| `/` | GET | Landing page and GitHub sign-in |
+| `/api/auth/*` | GET/POST | Auth.js OAuth and session endpoints |
 | `/api/health` | GET | Health check — is the process alive? Can it reach the DB? |
 
 ## Dependencies
@@ -19,7 +20,7 @@ All public routes are defined under `app/api/`:
 - `@project/db` — the Prisma client and generated types
 - `@project/services` — queue, storage, and notify adapters
 - `@project/domain` — Zod schemas and database queries (empty on main, populated on example branches)
-- `@project/auth` — the `currentUserId()` dev identity stub
+- `@project/auth` — Auth.js GitHub OAuth and session-derived identity
 - `@project/log` — pino logger
 
 ## Consumers

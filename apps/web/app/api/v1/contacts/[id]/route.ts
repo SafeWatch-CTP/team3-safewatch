@@ -29,7 +29,7 @@
  * 
  * Listing all contacts or adding a new one lives in /api/v1/contacts (route.ts)
  */
-import { currentUserId } from "@project/auth";
+import { AuthenticationRequiredError, currentUserId } from "@project/auth";
 import {UpdateContactSchema, updateEmergencyContact, deleteEmergencyContact} from "@project/domain";
 
 export async function PUT(
@@ -73,7 +73,7 @@ export async function PUT(
   } catch (error) { 
     console.error("contact-update-error", error);
 
-    if (error instanceof Error && error.message.includes("Dev identity stub is disabled")) {
+    if (error instanceof AuthenticationRequiredError) {
       return Response.json(
         { error: { code: "UNAUTHORIZED", message: "Authentication is required." } },
         { status: 401 }
@@ -107,7 +107,7 @@ export async function DELETE(request: Request,
   } catch (error) {
     console.error("contact-delete-error", error);
 
-    if (error instanceof Error && error.message.includes("Dev identity stub is disabled")) {
+    if (error instanceof AuthenticationRequiredError) {
       return Response.json(
         { error: { code: "UNAUTHORIZED", message: "Authentication is required." } },
         { status: 401 }

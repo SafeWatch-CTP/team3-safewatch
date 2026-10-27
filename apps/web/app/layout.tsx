@@ -9,8 +9,8 @@ const jetbrains = JetBrains_Mono({subsets: ["latin"], variable: "--font-jetbrain
 const sora = Sora({subsets: ["latin"], variable: "--font-sora"});
 
 export const metadata: Metadata = {
-  title: "Starter Skeleton",
-  description: "C12 Fall 2026 — every layer exists; the weeks make them deep.",
+  title: "SafeWatch",
+  description: "Stay connected to local safety alerts and emergency support.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

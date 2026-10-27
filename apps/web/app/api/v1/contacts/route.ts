@@ -23,7 +23,7 @@
  * Updating or deleting ONE contact lives in /api/v1/contacts/:id
  */
 
-import { currentUserId } from "@project/auth";
+import { AuthenticationRequiredError, currentUserId } from "@project/auth";
 import { createEmergencyContact, CreateEmergencyContactSchema, listEmergencyContacts } from "@project/domain";
 
 export const dynamic = "force-dynamic";
@@ -36,7 +36,7 @@ export async function GET() {
   } catch (error) {
     console.error("contact-list-error", error);
 
-    if (error instanceof Error && error.message.includes("Dev identity stub is disabled")) {
+    if (error instanceof AuthenticationRequiredError) {
       return Response.json(
         { error: { code: "UNAUTHORIZED", message: "Authentication is required." } },
         { status: 401 },
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("contact-create-error", error);
 
-    if (error instanceof Error && error.message.includes("Dev identity stub is disabled")) {
+    if (error instanceof AuthenticationRequiredError) {
       return Response.json(
         { error: { code: "UNAUTHORIZED", message: "Authentication is required." } },
         { status: 401 }
@@ -86,4 +86,3 @@ export async function POST(request: Request) {
     );
   }
 }
-
