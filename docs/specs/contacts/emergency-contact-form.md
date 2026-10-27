@@ -23,6 +23,10 @@ edits an existing contact as well as adding a new one.
 - `apps/web/app/contacts/contacts-header.tsx` — the title and the Edit button.
 - `apps/web/components/bottom-sheet.tsx` — the sliding panel the form opens in
   when editing.
+- `apps/web/components/icon.tsx` — renders the screen's PNG glyphs as CSS
+  masks so they take `currentColor`.
+- Colours, surfaces, focus, and motion come from
+  [design-system.md](../design-system.md); this spec does not restate them.
 - `packages/domain/src/zod_schemas/contacts.ts` — the field rules below, shared
   by both endpoints.
 - The endpoints this screen calls are specified in
@@ -50,7 +54,10 @@ tapping outside — discards any changes.
 second click cannot send the same contact twice.
 
 **When the server rejects the request**, the message it returned appears above
-the fields and everything the user typed is kept. Typing again leaves the
+the fields and everything the user typed is kept. The message is announced
+(`role="alert"`) and the required fields point at it with `aria-describedby`
+while it is showing, so the error reaches a screen reader with the fields it
+concerns. Typing again leaves the
 message in place; it clears only when the form is submitted again. Only the
 first failing rule is reported, so a form with two bad fields is corrected one
 message at a time.
@@ -62,7 +69,13 @@ the in-flight state.
 
 Validation runs on the server; the form sends what the user typed and
 reports what comes back. The one exception is the required-field check that
-keeps Save disabled, which is a convenience, not the rule itself.
+keeps Save disabled, which is a convenience, not the rule itself. The three
+required fields also carry `required` and `aria-required`, so a screen reader
+announces them as required rather than leaving a disabled Save unexplained.
+
+**Edit mode does not disable calling.** A row in edit mode is tappable to
+open the sheet, but its call button stays above that tap target and still
+dials. Keyboard and pointer reach the same two actions.
 
 | Field | Rule | Error when |
 |---|---|---|
@@ -146,6 +159,13 @@ none is drawn. It arrives with real auth — see [auth.md](../auth.md).
 - `curl -s -X POST localhost:3000/api/v1/contacts -H 'Content-Type:
   application/json' -d '{"firstName":"A","lastName":"B","phoneNumber":"123"}'`
   returns `400` with `{ error: { code, message } }`.
+- **Keyboard-only pass.** Reach and operate every control on `/contacts` with
+  Tab and Enter alone — tabs, Edit, each row in edit mode, each call button,
+  the form, the sheet's close. Every stop shows a visible focus outline, and
+  the sheet traps focus until Escape closes it.
+- **Edit-mode call drill.** Turn on edit mode and tap a call button. It must
+  dial, not open the sheet — the overlay that makes the row tappable covers
+  the whole row and has to stay below that button.
 
 ## Constraints & decisions
 - **One `status`, not a pair of booleans.** The in-flight and error states are
@@ -164,6 +184,15 @@ none is drawn. It arrives with real auth — see [auth.md](../auth.md).
   both, and neither exists yet.
 - **One message at a time.** The server reports the first failing rule only.
   A form with several bad fields is corrected across several submissions.
+- **The sheet is a native `<dialog>`.** Focus trapping, Escape, and the
+  dimmed backdrop are the element's, not this screen's — see
+  [design-system.md](../design-system.md). "Closing the sheet discards
+  changes" holds for all three routes out because each one lands on the same
+  `onClose`.
+- **The edit overlay sits below the call button.** Making a row tappable uses
+  an absolutely positioned button over the whole row, which would otherwise
+  swallow the call link for pointer users while keyboard users could still
+  reach it. The call link is lifted above it so both input methods agree.
 - **No optimistic update.** The list changes only after the server confirms.
   The contact list is the thing an emergency depends on, so a row that appears
   before it is saved would be a lie worth avoiding.
