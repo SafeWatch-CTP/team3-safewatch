@@ -15,59 +15,8 @@ describe("emergency contacts creation", () => {
     prisma = dbModule.prisma;
     POST = routeModule.POST;
 
-    await prisma.$executeRaw`CREATE TABLE IF NOT EXISTS _migrations (
-      name TEXT PRIMARY KEY,
-      applied_at TIMESTAMPTZ DEFAULT now()
-    )`;
-
-    const migrationName = "001_contact_schema_init.sql";
-    const alreadyApplied = await prisma.$queryRaw<Array<{ name: string }>>`
-      SELECT name FROM _migrations WHERE name = ${migrationName}
-    `;
-
-    if (alreadyApplied.length === 0) {
-      await prisma.$executeRawUnsafe(`CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN');`);
-      await prisma.$executeRawUnsafe(
-        `CREATE TYPE "Relationship" AS ENUM ('PARENT', 'SPOUSE', 'SIBLING', 'FRIEND', 'OTHER');`
-      );
-
-      await prisma.$executeRawUnsafe(`
-        CREATE TABLE "User" (
-          id TEXT PRIMARY KEY,
-          email TEXT NOT NULL UNIQUE,
-          "phoneNumber" TEXT NOT NULL UNIQUE,
-          role "Role" NOT NULL DEFAULT 'USER',
-          password TEXT NOT NULL,
-          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          "isEmailVerified" BOOLEAN NOT NULL DEFAULT false,
-          "isPhoneVerified" BOOLEAN NOT NULL DEFAULT false
-        );
-      `);
-
-      await prisma.$executeRawUnsafe(`
-        CREATE TABLE "EmergencyContact" (
-          id TEXT PRIMARY KEY,
-          "firstName" TEXT NOT NULL,
-          "lastName" TEXT NOT NULL,
-          "phoneNumber" TEXT NOT NULL,
-          email TEXT,
-          relationship "Relationship",
-          notified BOOLEAN NOT NULL DEFAULT false,
-          "isPrimary" BOOLEAN NOT NULL DEFAULT false,
-          "userId" TEXT NOT NULL,
-          "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          CONSTRAINT "EmergencyContact_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"(id) ON DELETE CASCADE
-        );
-      `);
-
-      await prisma.$executeRawUnsafe(
-        `CREATE INDEX "EmergencyContact_userId_idx" ON "EmergencyContact" ("userId");`
-      );
-
-      await prisma.$executeRaw`INSERT INTO _migrations (name) VALUES (${migrationName})`;
-    }
+    // The PGlite test door applies the real migrations when the client opens
+    // (packages/db/src/client.ts), so the schema already exists here.
 
     await prisma.user.deleteMany();
     await prisma.user.create({
