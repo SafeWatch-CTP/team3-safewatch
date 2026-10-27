@@ -15,8 +15,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`bg-neutral-900 ${jetbrains.variable} ${sora.variable}`}>
-      <body className="mx-auto max-w-phone min-h-dvh px-4 pt-10 pb-24 font-sans text-neutral-900 antialiased bg-bg font-light">
+    <html lang="en" className={`bg-bg ${jetbrains.variable} ${sora.variable}`}>
+      <body className="mx-auto max-w-phone min-h-dvh px-4 pt-10 pb-24 font-sans text-fg antialiased bg-linear-to-b from-tint via-bg to-bg font-normal">
         {children}
         <BottomNav />
       </body>
