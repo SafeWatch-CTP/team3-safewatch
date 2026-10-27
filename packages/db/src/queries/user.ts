@@ -68,14 +68,13 @@ export async function createAccount(email: string, phoneNumber: string, password
     }
 
 
-export async function createProfile(userId: string, firstName?: string, lastName?: string, pushToken?: string, defaultRadiusMiles?: number) {
+export async function createProfile(userId: string, firstName?: string, lastName?: string, pushToken?: string) {
     try {
         return await prisma.profile.create({
             data : {
                 firstName,
                 lastName,
                 pushToken,
-                defaultRadiusMiles,
                 user : {
                     connect : { id : userId }, // Foreign key, adding userId from User record to new Profile record
                 },

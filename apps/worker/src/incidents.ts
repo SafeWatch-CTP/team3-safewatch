@@ -6,6 +6,10 @@ import { indexIncident } from "@project/redis";
  * Called by the scanner when the CAD feed reports a new event.
  */
 export async function createIncident(data : {
+    // Incident.userId is NOT NULL in the database since
+    // 20260916042543_add_user_id_to_incidents, so the reporter has to come
+    // from the caller. Feed-ingested events need a system user to attribute to.
+    userId: string;
     title: string;
     category: IncidentCategory;
     severity: IncidentSeverity;
