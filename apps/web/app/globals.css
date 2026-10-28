@@ -1,5 +1,72 @@
 @import "tailwindcss";
 
+/* Palette: light surfaces, royal-blue primary, lilac secondary.
+   Every component colour comes from a token here — no raw hex in components. */
+@theme inline {
+  --font-sans: var(--font-sora), sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-display: var(--font-sora), sans-serif;
+
+  --color-bg: #f2f3f7;
+  --color-surface: #ffffff;
+  --color-border: #dfe3ec;
+  --color-fg: #0f172a;
+  --color-muted: #4e5b76;
+
+  /* One hue at four depths: deep for emphasis, base for actions,
+     tint for fills, panel for glass. Red belongs to SOS alone. */
+  --color-accent-deep: #16307f;
+  --color-accent: #2f55e8;
+  --color-accent-strong: #1e3fc4;
+  --color-tint: #dce6fd;
+  --color-panel: #e9eefc;
+  --color-dial: #c7d3ed;   /* the SOS dial — a step deeper than the panel */
+
+  /* Modal scrims: neutral for ordinary sheets, deep violet for the SOS dial
+     so the emergency path dims the app differently from everything else. */
+  --color-scrim: #0f172a;
+  --color-scrim-alert: #101a3a;
+
+  --color-success: #16a34a;
+  --color-danger: #dc2626;
+
+  --container-phone: 393px;
+  --animate-sheet-up: sheet-up 0.25s ease-out;
+  --animate-pop-in: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  --animate-jump-up: jump-up 0.45s cubic-bezier(0.34, 1.3, 0.64, 1) backwards;
+  --animate-fade-in: fade-in 0.2s ease-out;
+}
+
+/* The spring entrances (jump-up especially) are exactly the kind of motion
+   that triggers vestibular symptoms, so honour the OS setting. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes pop-in {
+  from { scale: 0; opacity: 0; }
+  to { scale: 1; opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes jump-up {
+  from { translate: 0 40vh; scale: 0.2; opacity: 0; }
+  to { translate: 0 0; scale: 1; opacity: 1; }
+}
+
 /* Incident map (docs/specs/incidents/incident-map.md). Leaflet's own focus
    styling isn't relied on: every focusable part of the map gets a ring. */
 .incident-map:focus-visible,
