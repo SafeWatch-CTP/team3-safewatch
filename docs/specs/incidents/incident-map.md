@@ -11,8 +11,17 @@ also in the list as text, so a user who can't see the map or can't use a
 pointer doesn't lose anything.
 
 ## Where it lives
-- `apps/web/app/page.tsx`: places the map between the location picker and
-  the feed, and gives each feed card an anchor id
+- `apps/web/app/page.tsx`: places the map and feed after the location
+  picker, inside a Suspense boundary and a section error boundary
+- `apps/web/app/_components/incident-feed.tsx`: reads the incidents once for
+  the map and the feed, renders the feed cards (each with an anchor id), and
+  holds the loading skeleton
+- `apps/web/app/_components/section-error-boundary.tsx`: the retry card when
+  the read fails
+- `apps/web/app/_components/refresh-button.tsx`: the empty state's
+  "Check again" action
+- `apps/web/app/error.tsx`: whole-page fallback when the page itself can't
+  render
 - `apps/web/app/_components/incident-map-section.tsx`: server-rendered
   heading, summary, severity key and skip link
 - `apps/web/app/_components/incident-map.tsx`: client boundary that loads
@@ -32,6 +41,21 @@ pointer doesn't lose anything.
   has `latitude` and `longitude`.
 - The page sends the client only the fields the map uses: `id`, `title`,
   `severity`, `category`, `address`, `latitude` and `longitude`.
+
+**Loading, empty and error**
+- The map and the feed load together behind one Suspense boundary. While the
+  incidents load, a skeleton the size of the map and three feed cards shows,
+  with a screen-reader status "Loading incidents…". The header and the
+  location picker render without waiting for it.
+- With no active incidents, the feed says "No active incidents right now"
+  and offers "Check again", which re-reads the feed. The button reads
+  "Checking…" and is disabled while the read runs.
+- If the read fails (for example, the database is stopped), only the map and
+  feed area is replaced by a card: "Couldn't load the incident feed", with a
+  "Try again" button that re-reads it. The location picker stays usable. The
+  card shows no raw error text.
+- If the page itself can't render (for example, the session lookup fails),
+  a whole-page "SafeWatch couldn't load" card with "Try again" replaces it.
 
 **Rendering**
 - Leaflet needs a browser, so the map loads only on the client. While it
@@ -105,6 +129,9 @@ link styles and focus handling are not relied on for this.
 | Activate "Show in list" | The page scrolls to that card, and the card has focus |
 | Tile server unreachable | Status message: tiles couldn't load and the list below has the same information |
 | JavaScript still loading | "Loading map…" placeholder; heading, key and skip link are already there |
+| Incidents still loading (Slow 4G) | Skeleton for the map and three cards; location picker already usable |
+| Database stopped after sign-in | "Couldn't load the incident feed" card with "Try again"; the rest of the page still works |
+| "Try again" after the database is back | The map and feed load |
 
 ## Verify
 - `pnpm vitest run tests/unit/incident-map-model.test.ts`: severity styles
@@ -122,6 +149,9 @@ link styles and focus handling are not relied on for this.
     still pans.
   - Block `tile.openstreetmap.org` in devtools (request blocking) and reload:
     the tile error message appears.
+  - Throttle to Slow 4G and reload: the skeleton shows, not a blank area.
+  - Stop the `db-server` process while signed in and reload: the feed's
+    retry card appears; restart it and press "Try again".
 
 ## Constraints & decisions
 - The map uses `listActiveIncidents` (city-wide, at most 25 items, most
