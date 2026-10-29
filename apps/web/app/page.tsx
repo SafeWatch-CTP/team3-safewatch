@@ -64,16 +64,11 @@ export default async function Home({
   const profileRedirect = profileCompletionRedirect(session.user.phoneNumber);
   if (profileRedirect) redirect(profileRedirect);
 
-  const userId = session.user.id;
-
   return (
     <main className="space-y-8 p-6">
       <header className="flex items-start justify-between gap-4">
         <div className="space-y-2">
           <h1 className="text-2xl font-bold">Active incidents</h1>
-          <p className="text-sm text-neutral-500">
-            Signed in as <code className="rounded bg-neutral-100 px-1">{userId}</code>
-          </p>
         </div>
         <LogoutButton />
       </header>
