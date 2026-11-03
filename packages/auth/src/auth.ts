@@ -1,11 +1,13 @@
 import type {} from "./types/next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@project/db";
-import NextAuth from "next-auth";
+import NextAuth, { type NextAuthConfig } from "next-auth";
 import GitHub from "next-auth/providers/github";
 import { getVerifiedGitHubEmail } from "./github-email";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+// Exported as a named config so tests can assert on it without starting
+// Auth.js: cookie handling is the library's default, and nothing overrides it.
+export const authConfig: NextAuthConfig = {
   adapter: PrismaAdapter(prisma),
   session: { strategy: "database" },
   pages: { signIn: "/", error: "/" },
@@ -44,4 +46,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
-});
+};
+
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig);
