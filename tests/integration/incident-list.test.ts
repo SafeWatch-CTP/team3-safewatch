@@ -1,8 +1,8 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
 describe("incident feed ordering", () => {
-  let prisma: any;
-  let listActiveIncidents: any;
+  let prisma: typeof import("@project/db").prisma;
+  let listActiveIncidents: typeof import("@project/domain").listActiveIncidents;
 
   beforeAll(async () => {
     // The PGlite door applies the real migrations when the client is created.
