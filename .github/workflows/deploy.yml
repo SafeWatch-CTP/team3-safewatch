@@ -1,0 +1,87 @@
+# Deploy — every push to main ships itself (docs/specs/deploy.md).
+# Build the image once and push it to GHCR → run the migrate job on it
+# (ADR-0014) → start a new Container Apps revision from it
+# (azure/container-apps-deploy-action). The platform moves traffic to the
+# revision only after its readiness probe on /api/health passes (ADR-0013);
+# this workflow waits for that and goes red if it never happens.
+# The polling lives in .github/scripts/.
+# One-time setup: docs/runbooks/provision-production.md.
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Two merges in a row deploy one after the other, never on top of each other.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write # push to GHCR
+  id-token: write # sign in to Azure with OIDC, no stored password
+
+env:
+  APP: ${{ vars.AZURE_CONTAINERAPP }}
+  JOB: ${{ vars.AZURE_CONTAINERAPP }}-migrate
+  RG: ${{ vars.AZURE_RESOURCE_GROUP }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Name the image
+        # GHCR wants lowercase; SafeWatch-CTP isn't.
+        run: echo "IMAGE=ghcr.io/${GITHUB_REPOSITORY,,}/web:$GITHUB_SHA" >> "$GITHUB_ENV"
+
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Refuse to deploy without the readiness gate or the migrate job
+        run: .github/scripts/preflight.sh
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push (the only place images are built)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          tags: ${{ env.IMAGE }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Migrate
+        timeout-minutes: 10
+        run: .github/scripts/migrate.sh
+
+      # The image is already in GHCR, so the action only deploys. No registry
+      # credentials: the action would store them on the app, and
+      # GITHUB_TOKEN expires when this job ends. The package is public.
+      - name: Start a new revision
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          imageToDeploy: ${{ env.IMAGE }}
+          containerAppName: ${{ env.APP }}
+          resourceGroup: ${{ env.RG }}
+          disableTelemetry: true
+          # No ingress/targetPort: the action then runs a plain
+          # `containerapp update`, which keeps the probes and revision mode.
+
+      - name: Wait for the platform to move traffic to it
+        run: .github/scripts/wait-ready.sh

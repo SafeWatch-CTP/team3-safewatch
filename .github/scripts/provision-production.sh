@@ -47,9 +47,23 @@ done
 step "3. Resource group and Container Apps environment"
 az group create -n "$RG" -l "$LOC" -o none
 if exists az containerapp env show -n "$ENV" -g "$RG"; then
+  mode=$(az containerapp env show -n "$ENV" -g "$RG" --query properties.environmentMode -o tsv 2>/dev/null || true)
+  if [ "$mode" = Express ]; then
+    echo "Environment $ENV is an Express environment, which can't run the migrate job."
+    echo "Delete the app and the environment, then re-run this script:"
+    echo "  az containerapp delete -n $APP -g $RG --yes"
+    echo "  az containerapp env delete -n $ENV -g $RG --yes"
+    exit 1
+  fi
   echo "Environment $ENV exists; keeping it."
 else
-  az containerapp env create -n "$ENV" -g "$RG" -l "$LOC" -o none
+  # Preview builds of the containerapp extension default to Express mode,
+  # which has no Jobs. Ask for the regular mode when the flag exists.
+  mode_args=()
+  if az containerapp env create -h 2>/dev/null | grep -q -- --environment-mode; then
+    mode_args=(--environment-mode WorkloadProfiles)
+  fi
+  az containerapp env create -n "$ENV" -g "$RG" -l "$LOC" "${mode_args[@]}" -o none
 fi
 
 step "4. Identity GitHub Actions signs in as (OIDC, no password)"
@@ -121,6 +135,9 @@ CONTAINERS=$(az containerapp show -n "$APP" -g "$RG" --query properties.template
   | node -e '
     let s = ""; process.stdin.on("data", d => s += d).on("end", () => {
       const c = JSON.parse(s);
+      // Newer CLI versions read fields (imageType) that this api-version
+      // rejects on write. Drop them; they are read-only labels.
+      delete c[0].imageType;
       c[0].probes = [
         { type: "Readiness", httpGet: { path: "/api/health", port: 3000 },
           periodSeconds: 10, timeoutSeconds: 5, failureThreshold: 3 },

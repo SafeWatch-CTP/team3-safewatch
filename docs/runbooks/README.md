@@ -31,4 +31,5 @@ Start from [`_template.md`](_template.md).
 
 | Runbook | When |
 |---|---|
-| _(none yet — the first arrives with the deploy machinery)_ | |
+| [provision-production](provision-production.md) | Production doesn't exist yet: first deploy, or rebuilding after the resource group is gone |
+| [rollback-bad-deploy](rollback-bad-deploy.md) | A deploy passed its readiness probe, took traffic, and broke something |

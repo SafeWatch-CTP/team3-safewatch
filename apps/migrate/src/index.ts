@@ -1,4 +1,5 @@
-// Applies pending SQL migrations against any DATABASE_URL. Used by CI.
+// Applies pending SQL migrations against any DATABASE_URL. In production it
+// runs as the migrate Container Apps Job before each deploy (ADR-0014).
 // The dev server also auto-applies on boot, so local dev rarely needs this.
 
 import { Client } from "pg";

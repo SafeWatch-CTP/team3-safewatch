@@ -27,7 +27,7 @@ store issue state. See [CONTRIBUTING](../../CONTRIBUTING.md) for the full arc.
 | [storage](storage.md) | infrastructure | Local-vs-real Azure pattern across blob and queue | 0006, 0008, 0005 |
 | [web](web.md) | infrastructure | Health endpoint, async-honesty UI standard, server entry ritual + error shape (404-not-403) | 0003, 0009 |
 | [auth](auth.md) | infrastructure | Identity derivation: dev stub now, sessions later, same seam | 0003 |
-| [deploy](deploy.md) | infrastructure | Container build + Azure topology, config via env only, kill-switches | 0008 |
+| [deploy](deploy.md) | infrastructure | Container build + Azure topology, config via env only, kill-switches | 0008, 0013, 0014 |
 | [observability](observability.md) | infrastructure | Structured logs, request IDs, what gets measured | — |
 
 ### Items domain (`items/`)
