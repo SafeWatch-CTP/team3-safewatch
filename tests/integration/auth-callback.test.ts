@@ -9,6 +9,14 @@ vi.mock("../../packages/auth/src/auth", () => ({
   },
 }));
 
+// The route's GET takes a NextRequest. `next` is not a root dependency, so the
+// type comes from the route's own signature rather than an import.
+type CallbackRequest = Parameters<
+  typeof import("../../apps/web/app/api/auth/[...nextauth]/route").GET
+>[0];
+
+const callback = (url: string) => new Request(url) as CallbackRequest;
+
 describe("GitHub OAuth callback", () => {
   beforeEach(() => {
     getHandler.mockReset();
@@ -21,7 +29,7 @@ describe("GitHub OAuth callback", () => {
     const { GET } = await import("../../apps/web/app/api/auth/[...nextauth]/route");
 
     const response = await GET(
-      new Request("http://localhost:3000/api/auth/callback/github?error=access_denied"),
+      callback("http://localhost:3000/api/auth/callback/github?error=access_denied"),
     );
 
     expect(response.headers.get("location")).toBe(
@@ -42,7 +50,7 @@ describe("GitHub OAuth callback", () => {
     const { GET } = await import("../../apps/web/app/api/auth/[...nextauth]/route");
 
     const response = await GET(
-      new Request("http://localhost:3000/api/auth/callback/github?error=access_denied"),
+      callback("http://localhost:3000/api/auth/callback/github?error=access_denied"),
     );
 
     expect(response.headers.get("set-cookie")).toContain("authjs.state=");
@@ -55,7 +63,7 @@ describe("GitHub OAuth callback", () => {
     const { GET } = await import("../../apps/web/app/api/auth/[...nextauth]/route");
 
     const response = await GET(
-      new Request("http://localhost:3000/api/auth/callback/github?error=server_error"),
+      callback("http://localhost:3000/api/auth/callback/github?error=server_error"),
     );
 
     expect(response.headers.get("location")).toBe(
@@ -70,7 +78,7 @@ describe("GitHub OAuth callback", () => {
     const { GET } = await import("../../apps/web/app/api/auth/[...nextauth]/route");
 
     await GET(
-      new Request(
+      callback(
         "http://localhost:3000/api/auth/callback/github?code=valid-code&iss=https%3A%2F%2Fgithub.com%2Flogin%2Foauth",
       ),
     );
@@ -84,7 +92,7 @@ describe("GitHub OAuth callback", () => {
     const { GET } = await import("../../apps/web/app/api/auth/[...nextauth]/route");
 
     const response = await GET(
-      new Request(
+      callback(
         "http://localhost:3000/api/auth/callback/github?code=invalid-code&iss=https%3A%2F%2Fevil.example",
       ),
     );
