@@ -1,22 +1,14 @@
 /**
- * ONE GLYPH PER EMERGENCY TYPE
+ * One glyph per emergency type. Drawn inline because /public/icons has no
+ * siren, flame or storm PNG; the strokes take currentColor the same way Icon
+ * does.
  *
- * Drawn inline rather than masked from /public/icons like the rest of the
- * app: there is no siren, flame or storm PNG in that folder, and a feed whose
- * rows all wear the same bell makes the type pill do work a glance should do.
- * These are strokes on currentColor, so they inherit the badge's colour the
- * same way Icon does, and they stay sharp where the raster masks soften.
- * docs/specs/design-system.md calls vector icons a pending improvement.
- *
- * Decorative: the row already says its type in the pill, so every glyph is
- * aria-hidden and adds nothing for a screen reader to read twice.
+ * Every glyph is aria-hidden: the row's pill already names the type.
  */
 
 import type {AlertType} from './sample-alerts';
 
-// 24x24 strokes, drawn to read at 22px inside the row's 40px badge.
 const PATHS: Record<AlertType, React.ReactNode> = {
-    // Shield with an exclamation — the one alert the user raised themselves.
     SOS: (
         <>
             <path d="M12 3.2 19 6v5.2c0 4.4-2.9 8.2-7 9.6-4.1-1.4-7-5.2-7-9.6V6l7-2.8Z" />
@@ -24,7 +16,6 @@ const PATHS: Record<AlertType, React.ReactNode> = {
             <path d="M12 16.2h.01" />
         </>
     ),
-    // Emergency light: dome, base, and three rays.
     CRIME: (
         <>
             <path d="M7 15.5a5 5 0 0 1 10 0" />
@@ -50,7 +41,6 @@ const PATHS: Record<AlertType, React.ReactNode> = {
             <path d="M13.2 13.8 10 18.4h3.2L11.8 22" />
         </>
     ),
-    // Cone with its two reflective bands.
     TRAFFIC_HAZARD: (
         <>
             <path d="M12 3.5 18 18H6Z" />

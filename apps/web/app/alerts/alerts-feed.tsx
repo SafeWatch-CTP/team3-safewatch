@@ -1,27 +1,21 @@
 /**
  * THE ALERTS FEED LIST
  *
- * Presentational only: it is handed the alerts it should show and renders
- * them newest first. Windowing, paging and data loading belong to the caller
- * (alerts-panel.tsx), so this component is safe to reuse for the short
- * "Your alerts" strip on the home page.
+ * Takes the alerts it should show and renders them. Picking the time window,
+ * paging and loading data are the caller's job (alerts-panel.tsx), so this
+ * can be reused for the short alerts strip on the home page.
  *
- * Rows use the same card as the contacts list — white glass on the panel, a
- * round badge on the left, a pill on the title line — so the two screens read
- * as one app. The badge glyph and the pill both carry the emergency type;
- * severity is the glow.
+ * Rows use the same card as the contacts list so the two screens match. The
+ * pill says the emergency type; the colour says the severity.
  */
 
 import {AlertTypeIcon} from './alert-type-icon';
 import type {AlertFeedItem, AlertSeverity, AlertType} from './sample-alerts';
 
 /**
- * One pale accent per severity, from the `--color-alert-*` tokens in
- * globals.css. The colour is carried by fills, rings and a soft outer glow
- * only — never by text, which stays on the app's own foreground tokens so a
- * pale hue never has to pass a contrast bar it would fail. The badge is a
- * solid chip of its severity with the glyph struck through it in deep ink,
- * which is what makes a severity readable across the room.
+ * One colour per severity, from the `--color-alert-*` tokens in globals.css.
+ * Colour is used for the badge fill, the card border and the glow, never for
+ * text, so a pale hue never has to carry something a reader must read.
  */
 const SEVERITY_GLOW: Record<AlertSeverity, {card: string; badge: string}> = {
     EMERGENCY: {
