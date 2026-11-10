@@ -37,6 +37,10 @@ looks fine in isolation, because the next screen will invent a different one.
 | `--color-scrim-alert` | `#101a3a` | the SOS backdrop |
 | `--color-success` | `#16a34a` | — |
 | `--color-danger` | `#dc2626` | SOS only |
+| `--color-alert-emergency` | `#ff8fa3` | alert-feed severity — pale rose |
+| `--color-alert-critical` | `#ff9f6b` | alert-feed severity — pale orange |
+| `--color-alert-warning` | `#ffd98e` | alert-feed severity — pale gold |
+| `--color-alert-info` | `#8ecbff` | alert-feed severity — pale sky |
 
 ## The contract
 
@@ -44,10 +48,16 @@ looks fine in isolation, because the next screen will invent a different one.
   `rgba()` shadow stops; nowhere else. A component needing a color that no
   token names needs a new token, not a literal.
 - **One hue carries the app.** Blue at four depths, with neutrals. A second
-  hue is a palette decision, not a component decision.
+  hue is a palette decision, not a component decision. The four `--color-alert-*`
+  severities are the standing exception, made deliberately and recorded here:
+  an alert feed has to separate four severities at a glance. They belong to
+  the feed and appear nowhere else; a fifth hue is still a palette decision.
 - **Red belongs to SOS.** The emergency button, the dial's title, and its
   Cancel. Nothing else is red — a failing metric or a destructive secondary
-  action uses `muted` plus a glyph, so red never stops meaning emergency.
+  action uses `muted` plus a glyph, so red never stops meaning emergency. The
+  feed's `--color-alert-emergency` is a pale rose rather than the SOS red, and
+  it marks the severity of an alert the SOS path produced; it never appears on
+  a control.
 - **Blue means interactive.** A saturated blue element does something. An
   identity mark or a label is tinted, outlined, or neutral, so a row never has
   two equally loud elements of which only one is tappable.
@@ -92,7 +102,9 @@ looks fine in isolation, because the next screen will invent a different one.
 - **Icons are PNG masks, not SVG.** `/public/icons/*.png` are 24px white
   glyphs; `Icon` masks them so they take `currentColor`. They are raster, so
   they soften on high-density screens. Replacing them with vectors is a
-  pending improvement, not a contract.
+  pending improvement, not a contract. The alert feed's emergency-type
+  glyphs are the first vectors in: inline SVG strokes on `currentColor`,
+  drawn because no siren, flame or storm PNG exists.
 - **Touch targets are not yet guaranteed 44px.** Call buttons are 40px and tab
   pills ~36px. Known, deliberate, and not yet fixed.
 - **Tab-like controls use `aria-pressed`, not the tablist pattern.** The
