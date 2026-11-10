@@ -22,17 +22,17 @@ looks fine in isolation, because the next screen will invent a different one.
 
 | Token | Value | Used for |
 |---|---|---|
-| `--color-bg` | `#f2f3f7` | page |
+| `--color-bg` | `#eef0ff` | page |
 | `--color-surface` | `#ffffff` | rows, fields, chips |
-| `--color-panel` | `#e9eefc` | the frosted panel a screen's content sits in |
+| `--color-panel` | `#e9edff` | the frosted panel a screen's content sits in |
 | `--color-dial` | `#c7d3ed` | the SOS dial, a step deeper than `panel` |
-| `--color-border` | `#dfe3ec` | hairlines |
+| `--color-border` | `#dfe4ff` | hairlines |
 | `--color-fg` | `#0f172a` | body text |
 | `--color-muted` | `#4e5b76` | supporting text |
-| `--color-accent` | `#2f55e8` | actions |
-| `--color-accent-strong` | `#1e3fc4` | hover/pressed |
-| `--color-accent-deep` | `#16307f` | emphasis text on tints, gradient end, the nav |
-| `--color-tint` | `#dce6fd` | accent fills |
+| `--color-accent` | `#3658e7` | actions |
+| `--color-accent-strong` | `#263b98` | hover/pressed |
+| `--color-accent-deep` | `#1d317f` | emphasis text on tints, gradient end, the nav |
+| `--color-tint` | `#e2e8ff` | accent fills |
 | `--color-scrim` | `#0f172a` | ordinary modal backdrops |
 | `--color-scrim-alert` | `#101a3a` | the SOS backdrop |
 | `--color-success` | `#16a34a` | — |

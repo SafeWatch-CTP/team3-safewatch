@@ -24,13 +24,13 @@ export default async function Home({
     return (
       <main className="mx-auto flex min-h-[60vh] max-w-lg flex-col justify-center gap-6">
         <header className="space-y-3">
-          <p className="text-sm font-semibold uppercase tracking-wider text-blue-700">
+          <p className="text-sm font-semibold uppercase tracking-wider text-accent-deep">
             SafeWatch
           </p>
           <h1 className="text-3xl font-bold tracking-tight">
             Safety starts with staying connected.
           </h1>
-          <p className="text-neutral-600">
+          <p className="text-muted">
             Sign in with GitHub to continue to your safety dashboard.
           </p>
         </header>
@@ -52,7 +52,7 @@ export default async function Home({
         >
           <button
             type="submit"
-            className="w-full rounded-lg bg-neutral-900 px-5 py-3 font-semibold text-white transition hover:bg-neutral-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+            className="w-full rounded-lg bg-accent px-5 py-3 font-semibold text-white transition hover:bg-accent-strong focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
           >
             Continue with GitHub
           </button>

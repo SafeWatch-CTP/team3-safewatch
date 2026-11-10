@@ -7,19 +7,19 @@
   --font-mono: var(--font-jetbrains), ui-monospace, monospace;
   --font-display: var(--font-sora), sans-serif;
 
-  --color-bg: #f2f3f7;
+  --color-bg: #eef0ff;
   --color-surface: #ffffff;
-  --color-border: #dfe3ec;
+  --color-border: #dfe4ff;
   --color-fg: #0f172a;
   --color-muted: #4e5b76;
 
   /* One hue at four depths: deep for emphasis, base for actions,
      tint for fills, panel for glass. Red belongs to SOS alone. */
-  --color-accent-deep: #16307f;
-  --color-accent: #2f55e8;
-  --color-accent-strong: #1e3fc4;
-  --color-tint: #dce6fd;
-  --color-panel: #e9eefc;
+  --color-accent-deep: #1d317f;
+  --color-accent: #3658e7;
+  --color-accent-strong: #263b98;
+  --color-tint: #e2e8ff;
+  --color-panel: #e9edff;
   --color-dial: #c7d3ed;   /* the SOS dial — a step deeper than the panel */
 
   /* Modal scrims: neutral for ordinary sheets, deep violet for the SOS dial
@@ -73,7 +73,7 @@
 .incident-map a:focus-visible,
 .incident-map .incident-pin:focus-visible,
 .incident-map .incident-popup__title:focus-visible {
-  outline: 3px solid #111827;
+  outline: 3px solid #3658e7;
   outline-offset: 2px;
 }
 

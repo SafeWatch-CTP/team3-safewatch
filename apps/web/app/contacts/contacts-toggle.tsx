@@ -46,17 +46,17 @@ export function ContactsToggle({contacts}: {contacts: Contact[]}) {
                     />
                 )}
             </BottomSheet>
-            <div className="-mx-2 min-h-[calc(100dvh-10.5rem)] space-y-5 rounded-3xl border border-white/70 bg-panel/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_32px_rgba(47,85,232,0.15)] backdrop-blur-2xl backdrop-saturate-125">
+            <div className="-mx-2 min-h-[calc(100dvh-10.5rem)] space-y-5 rounded-3xl border border-white/70 bg-panel/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_32px_rgba(54,88,231,0.15)] backdrop-blur-2xl backdrop-saturate-125">
                 <ContactsHeader adding={tab === 'add'} editMode={editMode} onEdit={() => setEditMode(!editMode)} />
 
-                <div className="flex w-full gap-1 rounded-full border border-white/60 bg-surface/50 p-1 shadow-[inset_0_1px_2px_rgba(47,85,232,0.08)]">
+                <div className="flex w-full gap-1 rounded-full border border-white/60 bg-surface/50 p-1 shadow-[inset_0_1px_2px_rgba(54,88,231,0.08)]">
                     {tabs.map((item) => (
                         <button
                             key={item.id}
                             type="button"
                             aria-pressed={tab === item.id}
                             onClick={() => switchTab(item.id)}
-                            className={`flex-1 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent px-4 py-2 text-sm transition-colors ${tab === item.id ? "bg-linear-to-r from-accent to-accent-deep text-white shadow-[0_2px_8px_rgba(47,85,232,0.3)]" : "text-muted hover:text-accent"}`}
+                            className={`flex-1 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent px-4 py-2 text-sm transition-colors ${tab === item.id ? "bg-linear-to-r from-accent to-accent-deep text-white shadow-[0_2px_8px_rgba(54,88,231,0.3)]" : "text-muted hover:text-accent"}`}
                         >
                             {item.label}
                         </button>

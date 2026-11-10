@@ -115,7 +115,7 @@ export function LocationPicker() {
   return (
     <section
       aria-labelledby="location-heading"
-      className="space-y-4 rounded-lg border border-neutral-200 bg-white p-6"
+      className="space-y-4 rounded-lg border border-border bg-surface p-6"
     >
       <h2 id="location-heading" className="text-lg font-semibold">
         Your location
@@ -131,7 +131,7 @@ export function LocationPicker() {
           </p>
         )}
         {message && (
-          <p className={status === "error" ? "text-red-700" : "text-neutral-700"}>{message}</p>
+          <p className="text-muted">{message}</p>
         )}
       </div>
 
@@ -146,7 +146,7 @@ export function LocationPicker() {
                 value={latitude}
                 onChange={(event) => setLatitude(event.target.value)}
                 placeholder="40.7128"
-                className="rounded border border-neutral-300 px-2 py-1"
+                className="rounded border border-border bg-surface px-2 py-1"
               />
             </label>
             <label className="flex flex-col text-sm">
@@ -157,14 +157,14 @@ export function LocationPicker() {
                 value={longitude}
                 onChange={(event) => setLongitude(event.target.value)}
                 placeholder="-74.006"
-                className="rounded border border-neutral-300 px-2 py-1"
+                className="rounded border border-border bg-surface px-2 py-1"
               />
             </label>
           </div>
           <button
             type="submit"
             disabled={status === "saving"}
-            className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+            className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-strong disabled:opacity-50"
           >
             {status === "saving" ? "Saving…" : "Save location"}
           </button>
@@ -177,7 +177,7 @@ export function LocationPicker() {
             type="button"
             onClick={useDevice}
             disabled={busy}
-            className="rounded border border-neutral-300 px-3 py-1.5 text-sm disabled:opacity-50"
+            className="rounded border border-border bg-surface px-3 py-1.5 text-sm disabled:opacity-50"
           >
             Use my location
           </button>
@@ -187,7 +187,7 @@ export function LocationPicker() {
             type="button"
             onClick={enterManually}
             disabled={status === "saving"}
-            className="rounded border border-neutral-300 px-3 py-1.5 text-sm disabled:opacity-50"
+            className="rounded border border-border bg-surface px-3 py-1.5 text-sm disabled:opacity-50"
           >
             {status === "locating" ? "Enter coordinates instead" : "Enter coordinates"}
           </button>
@@ -197,7 +197,7 @@ export function LocationPicker() {
           <button
             type="button"
             onClick={() => save(attempt.coordinates, attempt.source)}
-            className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white"
+            className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-strong"
           >
             Retry
           </button>

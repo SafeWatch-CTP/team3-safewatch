@@ -105,11 +105,11 @@ function PopupBody({ incident, isOpen }: { incident: MapIncident; isOpen: boolea
       <h3
         ref={titleRef}
         tabIndex={-1}
-        className="incident-popup__title text-base font-semibold text-neutral-900"
+        className="incident-popup__title text-base font-semibold text-fg"
       >
         {incident.title}
       </h3>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-neutral-700">
+      <dl className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-muted">
         <dt className="font-medium">Severity</dt>
         <dd>{SEVERITY_PIN[incident.severity].label}</dd>
         <dt className="font-medium">Category</dt>
@@ -117,7 +117,7 @@ function PopupBody({ incident, isOpen }: { incident: MapIncident; isOpen: boolea
         <dt className="font-medium">Address</dt>
         <dd>{incident.address ?? "Address unavailable"}</dd>
       </dl>
-      <a href={`#${incidentAnchorId(incident.id)}`} className="font-medium text-blue-700 underline">
+      <a href={`#${incidentAnchorId(incident.id)}`} className="font-medium text-accent-deep underline">
         Show in list
       </a>
     </div>
@@ -149,7 +149,7 @@ export function IncidentMapLeaflet({ incidents, labelledBy, describedBy }: Incid
       <MapContainer
         {...viewProps}
         scrollWheelZoom={false}
-        className="incident-map isolate h-80 w-full rounded-lg border border-neutral-300"
+        className="incident-map isolate h-80 w-full rounded-lg border border-border"
       >
         <MapKeyboardAndName labelledBy={labelledBy} describedBy={describedBy} />
         <TileLayer
@@ -179,7 +179,7 @@ export function IncidentMapLeaflet({ incidents, labelledBy, describedBy }: Incid
       </MapContainer>
 
       {/* Present from the first render so the message is announced when it appears. */}
-      <p role="status" className="text-sm text-red-700">
+      <p role="status" className="text-sm text-muted">
         {tilesFailed
           ? "Map tiles couldn't load. The incident list below has the same information."
           : ""}

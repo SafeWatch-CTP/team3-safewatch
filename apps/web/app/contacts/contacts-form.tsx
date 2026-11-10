@@ -94,7 +94,7 @@ export function ContactForm({initial, onSaved}: {initial?: ContactFormValues & {
                         placeholder="Alex"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        className= "w-full rounded-lg border border-white/70 bg-surface/75 px-3 py-2 text-fg outline-none backdrop-blur-sm placeholder:text-muted/50 focus-visible:border-accent focus-visible:bg-surface focus-visible:shadow-[0_0_0_3px_rgba(47,85,232,0.15)]"
+                        className= "w-full rounded-lg border border-white/70 bg-surface/75 px-3 py-2 text-fg outline-none backdrop-blur-sm placeholder:text-muted/50 focus-visible:border-accent focus-visible:bg-surface focus-visible:shadow-[0_0_0_3px_rgba(54,88,231,0.15)]"
                     />
                 </div>
                 <div className= "flex flex-col gap-1">
@@ -108,7 +108,7 @@ export function ContactForm({initial, onSaved}: {initial?: ContactFormValues & {
                         placeholder= "Chalif"
                         value= {lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        className= "w-full rounded-lg border border-white/70 bg-surface/75 px-3 py-2 text-fg outline-none backdrop-blur-sm placeholder:text-muted/50 focus-visible:border-accent focus-visible:bg-surface focus-visible:shadow-[0_0_0_3px_rgba(47,85,232,0.15)]"
+                        className= "w-full rounded-lg border border-white/70 bg-surface/75 px-3 py-2 text-fg outline-none backdrop-blur-sm placeholder:text-muted/50 focus-visible:border-accent focus-visible:bg-surface focus-visible:shadow-[0_0_0_3px_rgba(54,88,231,0.15)]"
                     />
                 </div>
                     <div className= "flex flex-col gap-1">
@@ -122,7 +122,7 @@ export function ContactForm({initial, onSaved}: {initial?: ContactFormValues & {
                             placeholder= "561-309-3489"
                             value= {phoneNumber}
                             onChange={(e) => setPhoneNumber(e.target.value)}
-                            className= "w-full rounded-lg border border-white/70 bg-surface/75 px-3 py-2 text-fg outline-none backdrop-blur-sm placeholder:text-muted/50 focus-visible:border-accent focus-visible:bg-surface focus-visible:shadow-[0_0_0_3px_rgba(47,85,232,0.15)]"
+                            className= "w-full rounded-lg border border-white/70 bg-surface/75 px-3 py-2 text-fg outline-none backdrop-blur-sm placeholder:text-muted/50 focus-visible:border-accent focus-visible:bg-surface focus-visible:shadow-[0_0_0_3px_rgba(54,88,231,0.15)]"
                         />
                     </div>
                     <div className= "flex flex-col gap-1">
@@ -133,7 +133,7 @@ export function ContactForm({initial, onSaved}: {initial?: ContactFormValues & {
                             placeholder= "bearthecat@gmail.com"
                             value= {email}
                             onChange={(e) => setEmail(e.target.value)}
-                            className= "w-full rounded-lg border border-white/70 bg-surface/75 px-3 py-2 text-fg outline-none backdrop-blur-sm placeholder:text-muted/50 focus-visible:border-accent focus-visible:bg-surface focus-visible:shadow-[0_0_0_3px_rgba(47,85,232,0.15)]"
+                            className= "w-full rounded-lg border border-white/70 bg-surface/75 px-3 py-2 text-fg outline-none backdrop-blur-sm placeholder:text-muted/50 focus-visible:border-accent focus-visible:bg-surface focus-visible:shadow-[0_0_0_3px_rgba(54,88,231,0.15)]"
                         />
                     </div>
                 <div className= "grid grid-cols-2 gap-3">
@@ -143,7 +143,7 @@ export function ContactForm({initial, onSaved}: {initial?: ContactFormValues & {
                             id= "relationship"
                             value= {relationship}
                             onChange={(e) => setRelationship(e.target.value)}
-                            className= "h-10.5 w-full rounded-lg border border-white/70 bg-surface/75 px-3 text-fg outline-none backdrop-blur-sm focus-visible:border-accent focus-visible:bg-surface focus-visible:shadow-[0_0_0_3px_rgba(47,85,232,0.15)]"
+                            className= "h-10.5 w-full rounded-lg border border-white/70 bg-surface/75 px-3 text-fg outline-none backdrop-blur-sm focus-visible:border-accent focus-visible:bg-surface focus-visible:shadow-[0_0_0_3px_rgba(54,88,231,0.15)]"
                         >
                             <option value= "">Select</option>
                             <option value= "PARENT">Parent</option>
@@ -162,7 +162,7 @@ export function ContactForm({initial, onSaved}: {initial?: ContactFormValues & {
                                 onChange= {(e) => setIsPrimary(e.target.checked)}
                                 className= "peer sr-only"
                             />
-                            <span className= "relative h-6 w-11 shrink-0 rounded-full bg-accent/20 ring-1 ring-inset ring-accent/20 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent transition-colors peer-checked:bg-accent peer-checked:ring-transparent after:absolute after:left-0.5 after:top-0.5 after:size-5 after:rounded-full after:bg-white after:shadow-[0_1px_3px_rgba(47,85,232,0.35)] after:transition-transform peer-checked:after:translate-x-5" />
+                            <span className= "relative h-6 w-11 shrink-0 rounded-full bg-accent/20 ring-1 ring-inset ring-accent/20 peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-accent transition-colors peer-checked:bg-accent peer-checked:ring-transparent after:absolute after:left-0.5 after:top-0.5 after:size-5 after:rounded-full after:bg-white after:shadow-[0_1px_3px_rgba(54,88,231,0.35)] after:transition-transform peer-checked:after:translate-x-5" />
                             {isPrimary ? "Yes" : "No"}
                         </span>
                     </label>

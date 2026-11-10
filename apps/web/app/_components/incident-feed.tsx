@@ -31,21 +31,21 @@ export async function IncidentFeed({ listId }: { listId: string }) {
         id={listId}
         tabIndex={-1}
         aria-labelledby="incident-list-heading"
-        className="rounded-lg border border-neutral-200 bg-neutral-50 p-6 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+        className="rounded-lg border border-border bg-panel p-6 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 id="incident-list-heading" className="text-lg font-semibold">
             Latest safety feed
           </h2>
-          <a href="/api/health" className="text-sm text-blue-600 underline">
+          <a href="/api/health" className="text-sm text-accent-deep underline">
             Health check
           </a>
         </div>
 
         <div className="space-y-3">
           {incidents.length === 0 ? (
-            <div className="space-y-3 rounded border border-dashed border-neutral-300 bg-white p-6 text-center">
-              <p className="text-neutral-600">No active incidents right now.</p>
+            <div className="space-y-3 rounded border border-dashed border-border bg-surface p-6 text-center">
+              <p className="text-muted">No active incidents right now.</p>
               <RefreshButton label="Check again" pendingLabel="Checking…" />
             </div>
           ) : (
@@ -55,15 +55,15 @@ export async function IncidentFeed({ listId }: { listId: string }) {
                 key={incident.id}
                 id={incidentAnchorId(incident.id)}
                 tabIndex={-1}
-                className="rounded border border-neutral-200 bg-white p-4 shadow-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+                className="rounded border border-border bg-surface p-4 shadow-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
                 <div className="mb-2 flex items-center justify-between gap-4">
                   <h3 className="font-semibold">{incident.title}</h3>
-                  <span className="rounded-full bg-red-100 px-2 py-1 text-xs font-medium text-red-700">
+                  <span className="rounded-full bg-tint px-2 py-1 text-xs font-medium text-accent-deep">
                     {incident.severity}
                   </span>
                 </div>
-                <div className="text-sm text-neutral-600">
+                <div className="text-sm text-muted">
                   <p>{incident.category}</p>
                   <p>{incident.address ?? "Location unavailable"}</p>
                   <p>{new Date(incident.createdAt).toLocaleString()}</p>
@@ -86,14 +86,14 @@ export function IncidentFeedSkeleton() {
         Loading incidents…
       </p>
       <div aria-hidden="true" className="space-y-3">
-        <div className="h-6 w-40 animate-pulse rounded bg-neutral-200" />
-        <div className="h-4 w-72 max-w-full animate-pulse rounded bg-neutral-200" />
-        <div className="h-80 animate-pulse rounded-lg bg-neutral-200" />
+        <div className="h-6 w-40 animate-pulse rounded bg-panel" />
+        <div className="h-4 w-72 max-w-full animate-pulse rounded bg-panel" />
+        <div className="h-80 animate-pulse rounded-lg bg-panel" />
       </div>
-      <div aria-hidden="true" className="space-y-3 rounded-lg border border-neutral-200 bg-neutral-50 p-6">
-        <div className="mb-4 h-6 w-48 animate-pulse rounded bg-neutral-200" />
+      <div aria-hidden="true" className="space-y-3 rounded-lg border border-border bg-panel p-6">
+        <div className="mb-4 h-6 w-48 animate-pulse rounded bg-surface" />
         {[0, 1, 2].map((row) => (
-          <div key={row} className="h-24 animate-pulse rounded border border-neutral-200 bg-white" />
+          <div key={row} className="h-24 animate-pulse rounded border border-border bg-surface" />
         ))}
       </div>
     </div>

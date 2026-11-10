@@ -12,7 +12,7 @@ const IncidentMapLeaflet = dynamic(
     ssr: false,
     // Same box as the map, so nothing shifts when it arrives.
     loading: () => (
-      <div className="flex h-80 w-full items-center justify-center rounded-lg border border-neutral-300 bg-neutral-100 text-sm text-neutral-700">
+      <div className="flex h-80 w-full items-center justify-center rounded-lg border border-border bg-panel text-sm text-muted">
         Loading map…
       </div>
     ),
