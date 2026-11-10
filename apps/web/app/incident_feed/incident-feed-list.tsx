@@ -9,7 +9,7 @@ export async function IncidentFeedList({ category }: { category: ListRecentIncid
 
   if (incidents.length === 0) {
     return (
-      <div className="space-y-3 rounded-2xl border border-dashed border-border bg-surface p-6 text-center">
+      <div className="space-y-3 rounded-2xl border border-white/70 bg-surface/70 p-6 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_3px_rgba(47,85,232,0.08)] backdrop-blur-md">
         {category ? (
           <>
             <p className="text-muted">No {categoryLabel(category)} incidents right now.</p>
@@ -38,11 +38,11 @@ export async function IncidentFeedList({ category }: { category: ListRecentIncid
         <li key={incident.id}>
           <Link
             href={`/incident_feed/${incident.id}${query}`}
-            className="block space-y-2 rounded-2xl border border-border bg-surface p-4 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            className="block space-y-2 rounded-2xl border border-white/70 bg-surface/70 p-4 text-fg shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_3px_rgba(47,85,232,0.08)] backdrop-blur-md transition hover:border-accent/30 hover:shadow-[0_2px_12px_rgba(30,63,196,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             <div className="flex items-start justify-between gap-3">
               <h2 className="font-semibold text-fg">{incident.title}</h2>
-              <span className="shrink-0 rounded-full bg-tint px-2 py-0.5 text-xs font-semibold text-accent-deep">
+              <span className="shrink-0 rounded-full border border-accent/30 bg-accent/15 px-2 py-0.5 text-xs font-semibold text-accent-deep">
                 {SEVERITY_LABELS[incident.severity] ?? incident.severity}
               </span>
             </div>
@@ -69,7 +69,7 @@ export function IncidentFeedListSkeleton() {
       </p>
       <div aria-hidden="true" className="space-y-3">
         {[0, 1, 2].map((row) => (
-          <div key={row} className="h-28 animate-pulse rounded-2xl border border-border bg-surface" />
+          <div key={row} className="h-28 animate-pulse rounded-2xl border border-white/70 bg-surface/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_3px_rgba(47,85,232,0.08)] backdrop-blur-md" />
         ))}
       </div>
     </div>

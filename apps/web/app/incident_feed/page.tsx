@@ -31,27 +31,29 @@ export default async function IncidentsPage({
 
   return (
     <main className="space-y-5 px-2 pt-2 pb-6">
-      <header className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="font-display text-[32px] font-extrabold leading-[1.05] tracking-tight text-fg">
-            <span className="font-medium text-accent">Incident</span>
-            <br />
-            <span className="font-light text-fg">Feed</span>
-          </h1>
-          <p className="mt-2 text-sm font-medium leading-[1.5] text-fg/75">
-            What just happened, newest first.
-          </p>
-        </div>
-        <FeedRefresh />
-      </header>
+      <div className="-mx-2 min-h-[calc(100dvh-10.5rem)] space-y-5 rounded-3xl border border-white/70 bg-panel/70 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.85),0_8px_32px_rgba(47,85,232,0.15)] backdrop-blur-2xl backdrop-saturate-125">
+        <header className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="font-display text-[32px] font-extrabold leading-[1.05] tracking-tight text-fg">
+              <span className="font-medium text-accent">Incident</span>
+              <br />
+              <span className="font-light text-fg">Feed</span>
+            </h1>
+            <p className="mt-2 text-sm font-medium leading-[1.5] text-fg/75">
+              What just happened, newest first.
+            </p>
+          </div>
+          <FeedRefresh />
+        </header>
 
-      <CategoryFilter current={category} />
+        <CategoryFilter current={category} />
 
-      <SectionErrorBoundary title="the incident feed">
-        <Suspense key={category ?? "all"} fallback={<IncidentFeedListSkeleton />}>
-          <IncidentFeedList category={category} />
-        </Suspense>
-      </SectionErrorBoundary>
+        <SectionErrorBoundary title="the incident feed">
+          <Suspense key={category ?? "all"} fallback={<IncidentFeedListSkeleton />}>
+            <IncidentFeedList category={category} />
+          </Suspense>
+        </SectionErrorBoundary>
+      </div>
     </main>
   );
 }

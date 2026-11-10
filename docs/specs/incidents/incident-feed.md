@@ -37,6 +37,10 @@ sent to the landing page.
 **Feed — `/incident_feed`**
 - Lists incidents whose status is `ACTIVE` or `INVESTIGATING`, newest first
   by `createdAt`, at most 50. Severity does not affect the order.
+- Uses the same frosted blue panel, rounded surfaces, and accent gradients as
+  the Contacts screen. Category filters and refresh controls use the shared
+  accent palette; incident cards remain translucent neutral surfaces with
+  severity shown as a word.
 - Each card shows the title, category, severity (as a word, not only a
   color), address (or "Location unavailable") and the time as a relative
   label: "Just now", "5 mins ago", "2 hrs ago", "3 days ago" ("1 min ago",

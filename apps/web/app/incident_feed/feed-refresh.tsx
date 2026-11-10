@@ -25,7 +25,7 @@ export function FeedRefresh() {
       type="button"
       onClick={() => startTransition(() => router.refresh())}
       disabled={pending}
-      className="shrink-0 rounded-lg border border-accent/15 bg-accent/10 px-3 py-2 text-sm text-accent transition-colors hover:bg-accent/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50"
+      className="shrink-0 rounded-lg border border-accent/15 bg-accent/10 px-3 py-2 text-sm font-medium text-accent transition-colors hover:bg-accent/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50"
     >
       {pending ? "Refreshing…" : "Refresh"}
     </button>

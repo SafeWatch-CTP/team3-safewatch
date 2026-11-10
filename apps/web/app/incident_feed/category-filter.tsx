@@ -15,7 +15,7 @@ export function CategoryFilter({ current }: { current: string | undefined }) {
 
   return (
     <nav aria-label="Filter by category">
-      <ul className="-mx-2 flex gap-2 overflow-x-auto px-2 pb-1">
+      <ul className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
         {options.map((option) => {
           const isCurrent = option.value === current;
           return (
@@ -23,10 +23,10 @@ export function CategoryFilter({ current }: { current: string | undefined }) {
               <Link
                 href={option.href}
                 aria-current={isCurrent ? "true" : undefined}
-                className={`block rounded-full border px-3 py-1.5 text-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+                className={`block rounded-full border px-3 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                   isCurrent
-                    ? "border-transparent bg-accent font-semibold text-white"
-                    : "border-border bg-surface text-fg hover:bg-tint"
+                    ? "border-transparent bg-linear-to-r from-accent to-accent-deep font-semibold text-white shadow-[0_2px_8px_rgba(47,85,232,0.3)]"
+                    : "border-white/60 bg-surface/50 text-muted hover:bg-tint hover:text-accent"
                 }`}
               >
                 {option.label}
