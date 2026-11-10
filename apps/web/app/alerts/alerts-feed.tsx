@@ -6,14 +6,14 @@
  * can be reused for the short alerts strip on the home page.
  *
  * Rows use the same card as the contacts list so the two screens match. The
- * pill says the emergency type; the colour says the severity.
+ * pill says the emergency type; the color says the severity.
  */
 
 import {AlertTypeIcon} from './alert-type-icon';
 import type {AlertFeedItem, AlertSeverity, AlertType} from './sample-alerts';
 
 /**
- * One colour per severity, from the `--color-alert-*` tokens in globals.css.
+ * One color per severity, from the `--color-alert-*` tokens in globals.css.
  * Colour is used for the badge fill, the card border and the glow, never for
  * text, so a pale hue never has to carry something a reader must read.
  */
@@ -75,7 +75,7 @@ export function AlertsFeed({alerts, now, emptyMessage}: {
                     >
                         <span className={`grid size-10 shrink-0 place-items-center rounded-full text-accent-deep ${glow.badge}`}>
                             <AlertTypeIcon type={alert.type} />
-                            {/* Severity is otherwise carried by colour alone. */}
+                            {/* Severity is otherwise carried by color alone. */}
                             <span className="sr-only">{alert.severity}</span>
                         </span>
 

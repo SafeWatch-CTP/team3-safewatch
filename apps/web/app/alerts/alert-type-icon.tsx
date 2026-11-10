@@ -1,7 +1,5 @@
 /**
- * One glyph per emergency type. Drawn inline because /public/icons has no
- * siren, flame or storm PNG; the strokes take currentColor the same way Icon
- * does.
+ * One glyph per emergency type.
  *
  * Every glyph is aria-hidden: the row's pill already names the type.
  */

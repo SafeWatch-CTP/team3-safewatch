@@ -41,7 +41,7 @@ when" — the bell in the bottom nav leads there.
 - Arrival time is relative: under a minute is `just now`, then `Nm ago`,
   `Nh ago`, and `Nd ago` past 24 hours. The row also carries the exact
   timestamp in a machine-readable `datetime`.
-- Severity is carried by colour — a badge filled with that severity's hue,
+- Severity is carried by color — a badge filled with that severity's hue,
   a card border in the same hue, and a soft glow beneath the card — and, because the pill is spent on the type, also by text
   only a screen reader reads.
 - Nothing on a row is interactive: the feed is read-only.
@@ -67,7 +67,7 @@ when" — the bell in the bottom nav leads there.
 - `curl -s -o /dev/null -w "%{http_code}" localhost:3000/alerts` with no
   session cookie returns `307`, with `pnpm dev` running.
 - `grep -rE '\[#[0-9a-fA-F]{3,8}\]' apps/web/app apps/web/components` returns
-  nothing — the severity colours are tokens, not literals
+  nothing — the severity colors are tokens, not literals
   ([design-system](../design-system.md)).
 - **Keyboard pass.** Tab through `/alerts` from the top: the window switch's
   two buttons, the paging button, then the nav. Every stop shows a visible
@@ -95,7 +95,7 @@ when" — the bell in the bottom nav leads there.
 - **Severity uses four `--color-alert-*` tokens**, which is the one standing
   exception to the single-hue palette, named in
   [design-system](../design-system.md). The hues are used for the badge fill,
-  the card's border and its glow — never for text, so a pale colour never has to pass a contrast bar
+  the card's border and its glow — never for text, so a pale color never has to pass a contrast bar
   it would fail. Severity is additionally exposed as screen-reader-only text,
   because the pill carries the type instead.
 - **Body text is never truncated.** Clamping would compact the rows, but with

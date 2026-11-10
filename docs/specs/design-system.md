@@ -102,9 +102,7 @@ looks fine in isolation, because the next screen will invent a different one.
 - **Icons are PNG masks, not SVG.** `/public/icons/*.png` are 24px white
   glyphs; `Icon` masks them so they take `currentColor`. They are raster, so
   they soften on high-density screens. Replacing them with vectors is a
-  pending improvement, not a contract. The alert feed's emergency-type
-  glyphs are the first vectors in: inline SVG strokes on `currentColor`,
-  drawn because no siren, flame or storm PNG exists.
+  pending improvement, not a contract.
 - **Touch targets are not yet guaranteed 44px.** Call buttons are 40px and tab
   pills ~36px. Known, deliberate, and not yet fixed.
 - **Tab-like controls use `aria-pressed`, not the tablist pattern.** The
