@@ -8,7 +8,7 @@ import {SosButton} from './sos-button';
 export function BottomNav() {
     const icons = [
         {href: "/", label: "Home", icon: "/icons/house.png"},
-        {href: "/incidents", label: "Feed", icon: "/icons/feed.png"},
+        {href: "/incident_feed", label: "Feed", icon: "/icons/feed.png"},
         {href: "/alerts", label: "Alerts", icon: "/icons/bell.png"},
         {href: "/contacts", label: "Contacts", icon: "/icons/contact.png"}
     ]
@@ -19,7 +19,7 @@ export function BottomNav() {
         <nav aria-label= "Primary" className= "fixed bottom-3 left-1/2 -translate-x-1/2 w-[calc(100%-1.5rem)] max-w-[369px] rounded-[22px] bg-accent-deep px-2 py-2 shadow-[0_8px_28px_rgba(16,48,127,0.45)]">
             <ul className = "grid grid-cols-5 items-center">
                 {icons.map((item, i) => {
-                    const isActive = pathname === item.href;
+                    const isActive = item.href === "/" ? pathname === "/" : pathname === item.href || pathname.startsWith(`${item.href}/`);
                     return (
                         <li key= {item.href} className={i === 2 ? "col-start-4" : ""}>
                             <Link

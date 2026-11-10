@@ -14,11 +14,22 @@
  *      - Lists active incidents across the whole city, most severe first, for the home page
  *        feed and the map above it (each item carries its coordinates).
  *
+ * 4. listRecentIncidents(input)
+ *      - Lists active incidents newest first, optionally one category, for the Feed tab.
+ *
+ * 5. getIncidentDetail(id)
+ *      - One incident with its timeline for the Feed tab's detail page. Unlike
+ *        getIncidentById it leaves out the alerts, which are per-user records.
+ *
  */
 
 import { prisma, IncidentStatus, IncidentSeverity, IncidentCategory } from "@project/db";
 import { getIncidentIdsInRadius} from "@project/redis";
-import { ListActiveIncidentsInput, ListNearbyIncidentsInput } from "../zod_schemas/incidents";
+import {
+  ListActiveIncidentsInput,
+  ListNearbyIncidentsInput,
+  ListRecentIncidentsInput,
+} from "../zod_schemas/incidents";
 
 
 export const incidentSeverityOrder: Record<IncidentSeverity, number> = {
@@ -127,4 +138,56 @@ export async function listActiveIncidents(
       return b.createdAt.getTime() - a.createdAt.getTime();
     })
     .slice(0, limit);
+}
+
+export const RECENT_INCIDENTS_LIMIT = 50;
+
+export type RecentIncident = {
+  id: string;
+  title: string;
+  severity: IncidentSeverity;
+  category: IncidentCategory;
+  address: string | null;
+  createdAt: Date;
+};
+
+export async function listRecentIncidents(
+  input: ListRecentIncidentsInput = {}
+): Promise<RecentIncident[]> {
+  return prisma.incident.findMany({
+    where: {
+      status: { in: [IncidentStatus.ACTIVE, IncidentStatus.INVESTIGATING] },
+      ...(input.category ? { category: input.category } : {}),
+    },
+    select: {
+      id: true,
+      title: true,
+      severity: true,
+      category: true,
+      address: true,
+      createdAt: true,
+    },
+    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    take: RECENT_INCIDENTS_LIMIT,
+  });
+}
+
+export async function getIncidentDetail(id: string) {
+  return prisma.incident.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      title: true,
+      category: true,
+      severity: true,
+      status: true,
+      address: true,
+      description: true,
+      createdAt: true,
+      updates: {
+        select: { id: true, message: true, createdAt: true },
+        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+      },
+    },
+  });
 }

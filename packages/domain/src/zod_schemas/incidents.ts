@@ -95,6 +95,14 @@ export const listActiveIncidentsSchema = z.object({
 
 export type ListActiveIncidentsInput = z.infer<typeof listActiveIncidentsSchema>;
 
+// The Feed tab's query string. An unknown or repeated category is dropped
+// rather than rejected, so a stale link shows the unfiltered feed.
+export const ListRecentIncidentsSchema = z.object({
+    category: z.nativeEnum(IncidentCategory).optional().catch(undefined),
+});
+
+export type ListRecentIncidentsInput = z.infer<typeof ListRecentIncidentsSchema>;
+
 export const CreateIncidentSchema = z.object({
     title: z.string().trim().min(1).max(100), // Title for the map pin card and mobile push notification banners
     category: z.nativeEnum(IncidentCategory), // Classification type, bound directly to the Prisma IncidentCategory enum
