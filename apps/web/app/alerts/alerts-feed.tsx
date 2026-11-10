@@ -19,24 +19,26 @@ import type {AlertFeedItem, AlertSeverity, AlertType} from './sample-alerts';
  * One pale accent per severity, from the `--color-alert-*` tokens in
  * globals.css. The colour is carried by fills, rings and a soft outer glow
  * only — never by text, which stays on the app's own foreground tokens so a
- * pale hue never has to pass a contrast bar it would fail.
+ * pale hue never has to pass a contrast bar it would fail. The badge is a
+ * solid chip of its severity with the glyph struck through it in deep ink,
+ * which is what makes a severity readable across the room.
  */
 const SEVERITY_GLOW: Record<AlertSeverity, {card: string; badge: string}> = {
     EMERGENCY: {
-        card: "shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_12px_-3px_var(--color-alert-emergency)]",
-        badge: "bg-alert-emergency/25 ring-alert-emergency/60",
+        card: "border-alert-emergency/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_16px_-4px_var(--color-alert-emergency)]",
+        badge: "bg-alert-emergency",
     },
     CRITICAL: {
-        card: "shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_12px_-3px_var(--color-alert-critical)]",
-        badge: "bg-alert-critical/25 ring-alert-critical/60",
+        card: "border-alert-critical/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_16px_-4px_var(--color-alert-critical)]",
+        badge: "bg-alert-critical",
     },
     WARNING: {
-        card: "shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_12px_-3px_var(--color-alert-warning)]",
-        badge: "bg-alert-warning/25 ring-alert-warning/60",
+        card: "border-alert-warning/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_16px_-4px_var(--color-alert-warning)]",
+        badge: "bg-alert-warning",
     },
     INFO: {
-        card: "shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_2px_12px_-3px_var(--color-alert-info)]",
-        badge: "bg-alert-info/25 ring-alert-info/60",
+        card: "border-alert-info/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_4px_16px_-4px_var(--color-alert-info)]",
+        badge: "bg-alert-info",
     },
 };
 
@@ -75,9 +77,9 @@ export function AlertsFeed({alerts, now, emptyMessage}: {
                 return (
                     <li
                         key={alert.id}
-                        className={`flex min-h-[72px] items-start gap-1 rounded-2xl border border-white/70 bg-surface/70 px-3 py-3 text-fg backdrop-blur-md ${glow.card}`}
+                        className={`flex min-h-[72px] items-start gap-1 rounded-2xl border bg-surface/70 px-3 py-3 text-fg backdrop-blur-md ${glow.card}`}
                     >
-                        <span className={`grid size-10 shrink-0 place-items-center rounded-full ring-1 text-accent-deep ${glow.badge}`}>
+                        <span className={`grid size-10 shrink-0 place-items-center rounded-full text-accent-deep ${glow.badge}`}>
                             <AlertTypeIcon type={alert.type} />
                             {/* Severity is otherwise carried by colour alone. */}
                             <span className="sr-only">{alert.severity}</span>

@@ -41,8 +41,8 @@ when" — the bell in the bottom nav leads there.
 - Arrival time is relative: under a minute is `just now`, then `Nm ago`,
   `Nh ago`, and `Nd ago` past 24 hours. The row also carries the exact
   timestamp in a machine-readable `datetime`.
-- Severity is carried by colour — a tinted badge and a soft glow in that
-  severity's hue — and, because the pill is spent on the type, also by text
+- Severity is carried by colour — a badge filled with that severity's hue,
+  a card border in the same hue, and a soft glow beneath the card — and, because the pill is spent on the type, also by text
   only a screen reader reads.
 - Nothing on a row is interactive: the feed is read-only.
 
@@ -94,8 +94,8 @@ when" — the bell in the bottom nav leads there.
   a decision, not a default.
 - **Severity uses four `--color-alert-*` tokens**, which is the one standing
   exception to the single-hue palette, named in
-  [design-system](../design-system.md). The hues are used for fills, rings and
-  glow only, never for text, so a pale colour never has to pass a contrast bar
+  [design-system](../design-system.md). The hues are used for the badge fill,
+  the card's border and its glow — never for text, so a pale colour never has to pass a contrast bar
   it would fail. Severity is additionally exposed as screen-reader-only text,
   because the pill carries the type instead.
 - **Body text is never truncated.** Clamping would compact the rows, but with
