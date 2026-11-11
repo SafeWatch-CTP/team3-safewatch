@@ -1,0 +1,18 @@
+# What `docker build` never sees. Installs and builds happen inside the
+# image; local state and secrets never get baked into it.
+**/node_modules
+**/.next
+**/.turbo
+**/dist
+**/*.tsbuildinfo
+packages/db/src/generated
+.pgdata
+.pglite
+.azurite
+.git
+.github
+.opencode
+**/.DS_Store
+.env*
+**/.env*
+!.env.example
