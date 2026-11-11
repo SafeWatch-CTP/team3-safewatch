@@ -30,6 +30,17 @@
   --color-success: #16a34a;
   --color-danger: #dc2626;
 
+  /* Alert severity — pale, luminous accents that glow against the navy alert
+     cards in the feed. These are the one deliberate exception to the
+     single-hue rule above: a feed has to separate four severities at a
+     glance, and reading the pill's wording is not fast enough. Rose sits as
+     close to the SOS red as a non-SOS element is allowed to. Used by the
+     alerts feed and nowhere else. */
+  --color-alert-emergency: #ff8fa3;
+  --color-alert-critical: #ff9f6b;
+  --color-alert-warning: #ffd98e;
+  --color-alert-info: #8ecbff;
+
   --container-phone: 393px;
   --animate-sheet-up: sheet-up 0.25s ease-out;
   --animate-pop-in: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
