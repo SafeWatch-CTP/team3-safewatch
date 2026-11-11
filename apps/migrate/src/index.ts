@@ -15,14 +15,21 @@ async function main() {
     console.error("Is the dev server running? (`pnpm dev` starts the local database.)");
     process.exit(1);
   });
-  await applyMigrations(
-    {
-      exec: async (sql) => void (await client.query(sql)),
-      query: async (sql, params) => client.query(sql, params),
-    },
-    console.log
-  );
-  await client.end();
+  try {
+    // Session lock: held inside Azure even if the GitHub waiter is cancelled.
+    // All production migrators use this key and this dedicated connection.
+    await client.query("SELECT pg_advisory_lock(1935763045, 1)");
+    await applyMigrations(
+      {
+        exec: async (sql) => void (await client.query(sql)),
+        query: async (sql, params) => client.query(sql, params),
+      },
+      console.log
+    );
+  } finally {
+    // Closing the session releases the lock, including on migration failure.
+    await client.end();
+  }
   console.log("done");
 }
 

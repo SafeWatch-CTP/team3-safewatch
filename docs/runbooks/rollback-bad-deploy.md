@@ -1,3 +1,7 @@
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:ea5f7710360ea4cd2f53783d3bfed4571f4bb4fb1b3e9092f3ece83cc405b1d5 -->
+
 # A bad revision took traffic
 
 **Use when:** a deploy passed its readiness probe, took traffic, and broke
@@ -7,10 +11,11 @@ didn't.
 
 ## Before you start
 
+- Set the names: `APP=<container app>` and `RG=<resource group>` (the
+  repository variables `AZURE_CONTAINERAPP` and `AZURE_RESOURCE_GROUP`,
+  respectively).
 - `az login` works and you have Contributor on the resource group. Check
   now: `az containerapp show -n "$APP" -g "$RG" -o none`.
-- Set the names: `APP=<container app>` and `RG=<resource group>` (the repo
-  variables `AZURE_CONTAINERAPP` and `AZURE_RESOURCE_GROUP`).
 - Blast radius: the app runs one revision at a time, so rolling back is a
   redeploy of the previous image. It takes a few minutes, and the bad
   revision keeps serving until the good one passes its readiness probe. It
@@ -20,9 +25,23 @@ didn't.
 
 1. List the revisions and their images, newest last:
    `az containerapp revision list -n "$APP" -g "$RG" --all --query "sort_by(@, &properties.createdTime)[].{name:name, image:properties.template.containers[0].image, active:properties.active, health:properties.healthState}" -o table`
-2. Write down the bad image (the newest, active one) and the last good one
-   (the newest image before it that you know worked).
-3. Redeploy the good image:
+2. Identify the revision currently serving traffic before choosing images:
+   `az containerapp show -n "$APP" -g "$RG" --query "{ready:properties.latestReadyRevisionName, latest:properties.latestRevisionName, traffic:properties.configuration.ingress.traffic}" -o json`
+   In single-revision mode, use the latest **ready** revision and confirm
+   the traffic assignment; a newer revision may still be starting and
+   active alone does not prove it serves traffic. Match the serving
+   revision to its image in step 1, record the bad image, and choose a
+   verified last-good image whose behavior worked and whose code remains
+   compatible with the current schema.
+3. Pause new deployments before recovery: disable the Deploy workflow
+   (`gh workflow disable deploy.yml`) and pause merges/manual deployments.
+   Drain queued and running deployment workflows (inspect with
+   `gh run list --workflow deploy.yml`), then inspect Azure migration job
+   executions (`az containerapp job execution list -n "$APP-migrate" -g "$RG"`)
+   and wait for all outstanding executions to finish. Cancelling a GitHub
+   run does not stop its Azure migration execution. Confirm no deployment
+   or migration is still running before proceeding.
+   Redeploy the good image:
    `az containerapp update -n "$APP" -g "$RG" --image <good-image> -o none`
 4. Wait until the platform serves it. This prints the new revision's name
    once it's ready:
@@ -30,7 +49,9 @@ didn't.
    Repeat until `latest` and `ready` match.
 5. ⚠ Main still contains the bad commit, and the next merge to main deploys
    it again. Open a revert PR now (`git revert <sha>`) and merge it before
-   anything else.
+   anything else. Keep deployments paused until the revert is merged and
+   recovery is verified, then re-enable the workflow
+   (`gh workflow enable deploy.yml`) and deploy the corrected main.
 6. Post in the team channel: what broke, which image is serving, the
    revert PR link.
 
@@ -56,3 +77,6 @@ didn't.
 - Spec of the system being operated on: `docs/specs/deploy.md`
 - Why migrations don't roll back: `docs/adr/0014-migrate-in-a-container-apps-job.md`
 - Why rollback is a redeploy: `docs/adr/0013-readiness-probe-gates-traffic.md`
+
+
+<!-- /coderabbit-ai-generated:v1 -->

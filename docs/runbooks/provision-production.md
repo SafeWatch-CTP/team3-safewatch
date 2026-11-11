@@ -1,3 +1,7 @@
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:80bfaf86f1eb60ad2a70c1c8ff03ef6118792e9ab72d29f57d8602d4721cbe5d -->
+
 # Production doesn't exist yet
 
 **Use when:** standing up production from nothing: the first deploy, or a
@@ -19,6 +23,15 @@ rebuild after the resource group is gone.
 
 ## Steps
 
+Set and export the resource names in your shell before running the script,
+using these defaults or your chosen overrides, so later address lookups and
+OAuth secret commands use the same resources:
+
+```bash
+export APP=safewatch
+export RG=rg-safewatch
+```
+
 Steps 1–9 are automated. Run `.github/scripts/provision-production.sh`
 from the repo root (Git Bash on Windows), answer its prompts, then
 continue at step 10. It defaults to `LOC=canadacentral`; override any name
@@ -37,11 +50,20 @@ what it does, for when it fails partway.
    `az containerapp env create -n "$ENV" -g "$RG" -l "$LOC" --environment-mode WorkloadProfiles`
    (Without `--environment-mode`, preview CLI builds create an Express
    environment, which can't run the migrate job in step 9.)
-4. Create the identity GitHub Actions signs in as, allowed to manage this
-   resource group only:
+4. Reuse the existing `gh-safewatch-deploy` identity during recovery;
+   create it only when none exists. It may manage this resource group only.
+   If multiple identities match, stop and choose the intended existing
+   identity. If replacing an identity, first revoke the original identity’s
+   Contributor role assignment on this resource group and delete its
+   `deploy-from-main` federated credential, then create the replacement.
    ```bash
-   CLIENT_ID=$(az ad app create --display-name gh-safewatch-deploy --query appId -o tsv)
-   az ad sp create --id "$CLIENT_ID"
+   CLIENT_ID=$(az ad app list --display-name gh-safewatch-deploy --query "[0].appId" -o tsv)
+   if [ -z "$CLIENT_ID" ]; then
+     CLIENT_ID=$(az ad app create --display-name gh-safewatch-deploy --query appId -o tsv)
+   fi
+   az ad sp show --id "$CLIENT_ID" -o none || az ad sp create --id "$CLIENT_ID"
+   # Reuse an existing Contributor assignment and deploy-from-main credential;
+   # run their create commands below only when absent.
    az role assignment create --assignee "$CLIENT_ID" --role Contributor \
      --scope "$(az group show -n "$RG" --query id -o tsv)"
    az ad app federated-credential create --id "$CLIENT_ID" --parameters '{
@@ -63,6 +85,9 @@ what it does, for when it fails partway.
    developer's:
    `read -s DATABASE_URL; read -s UPSTASH_URL; read -s UPSTASH_TOKEN`
    `AUTH_SECRET=$(openssl rand -base64 33)`
+   All three prompted values are required. On partial recovery, verify
+   `DATABASE_URL` exactly matches the surviving app or job’s `database-url`
+   secret before creating the missing resource; stop and reconcile a mismatch.
 7. Create the app from Microsoft's placeholder image. The first deploy
    replaces it with ours.
    ```bash
@@ -155,3 +180,6 @@ what it does, for when it fails partway.
 
 - Spec of the system being operated on: `docs/specs/deploy.md`
 - What to do when a deploy goes wrong later: `docs/runbooks/rollback-bad-deploy.md`
+
+
+<!-- /coderabbit-ai-generated:v1 -->

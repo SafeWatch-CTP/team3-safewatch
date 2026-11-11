@@ -5,7 +5,9 @@
 set -euo pipefail
 
 # Same image, the job's own command (the migrator). If this fails, no
-# revision is created and the old code keeps serving.
+# revision is created and the old code keeps serving. The migrator holds a
+# Postgres session advisory lock inside Azure until migration execution ends;
+# cancelling this waiter does not release that lock.
 az containerapp job update -n "$JOB" -g "$RG" --image "$IMAGE" -o none
 run=$(az containerapp job start -n "$JOB" -g "$RG" --query name -o tsv)
 echo "Execution: $run"

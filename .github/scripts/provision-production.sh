@@ -104,11 +104,28 @@ if [ "$APP_EXISTS" = no ] || [ "$JOB_EXISTS" = no ]; then
   step "6. Secrets (typing is hidden; paste and press Enter)"
   read -r -s -p "DATABASE_URL (ends in ?sslmode=require): " DATABASE_URL; echo
   [ -n "$DATABASE_URL" ] || { echo "DATABASE_URL is required."; exit 1; }
+  if [ "$APP_EXISTS" != "$JOB_EXISTS" ]; then
+    resource=(containerapp)
+    existing_name=$APP
+    if [ "$JOB_EXISTS" = yes ]; then
+      resource=(containerapp job)
+      existing_name=$JOB
+    fi
+    existing_url=$(az "${resource[@]}" secret list -n "$existing_name" -g "$RG" \
+      --show-values --query "[?name=='database-url'].value | [0]" -o tsv)
+    if [ -z "$existing_url" ] || [ "$DATABASE_URL" != "$existing_url" ]; then
+      echo "DATABASE_URL does not match $existing_name's database-url secret. Reconcile the database URLs before continuing."
+      exit 1
+    fi
+    unset existing_url
+  fi
 fi
 
 if [ "$APP_EXISTS" = no ]; then
   read -r -s -p "UPSTASH_REDIS_REST_URL (production database): " UPSTASH_URL; echo
   read -r -s -p "UPSTASH_REDIS_REST_TOKEN: " UPSTASH_TOKEN; echo
+  [ -n "$UPSTASH_URL" ] || { echo "UPSTASH_REDIS_REST_URL is required."; exit 1; }
+  [ -n "$UPSTASH_TOKEN" ] || { echo "UPSTASH_REDIS_REST_TOKEN is required."; exit 1; }
   AUTH_SECRET=$(node -e "process.stdout.write(require('crypto').randomBytes(33).toString('base64'))")
 
   step "7. Container App (placeholder image; the first deploy replaces it)"
@@ -118,7 +135,7 @@ if [ "$APP_EXISTS" = no ]; then
     --min-replicas 0 --max-replicas 1 --revisions-mode single \
     --secrets database-url="$DATABASE_URL" auth-secret="$AUTH_SECRET" \
       github-id=unset github-secret=unset \
-      upstash-url="${UPSTASH_URL:-unset}" upstash-token="${UPSTASH_TOKEN:-unset}" \
+      upstash-url="$UPSTASH_URL" upstash-token="$UPSTASH_TOKEN" \
     --env-vars DATABASE_URL=secretref:database-url AUTH_SECRET=secretref:auth-secret \
       GITHUB_ID=secretref:github-id GITHUB_SECRET=secretref:github-secret \
       UPSTASH_REDIS_REST_URL=secretref:upstash-url \
