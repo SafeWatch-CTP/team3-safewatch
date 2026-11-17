@@ -10,14 +10,14 @@
  *    to the landing page to sign in.
  *
  * The rows are placeholder data for now. Landing the real feed means
- * replacing the SAMPLE_ALERTS import with the user-scoped query and passing
- * `new Date()` as `now` — nothing else on this screen changes.
+ * replacing the sampleAlerts() call with the user-scoped query — `now` is
+ * already the real clock, and nothing else on this screen changes.
  */
 
 import {AuthenticationRequiredError, currentUserId} from '@project/auth';
 import {redirect} from 'next/navigation';
 import {AlertsPanel} from './alerts-panel';
-import {FEED_NOW, SAMPLE_ALERTS} from './sample-alerts';
+import {sampleAlerts} from './sample-alerts';
 
 export const dynamic = "force-dynamic";
 
@@ -32,9 +32,13 @@ export default async function AlertsPage() {
         throw error;
     }
 
+    // One instant for the whole render: the window filter and every row's
+    // "8m ago" have to agree on what time it is, and two Date() calls do not.
+    const now = new Date();
+
     return (
         <main className="px-2 pt-2 pb-6 space-y-6">
-            <AlertsPanel alerts={SAMPLE_ALERTS} now={FEED_NOW} />
+            <AlertsPanel alerts={sampleAlerts(now)} now={now} />
         </main>
     );
 }

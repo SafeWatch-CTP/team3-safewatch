@@ -7,9 +7,16 @@
  *
  * Rows use the same card as the contacts list so the two screens match. The
  * pill says the emergency type; the color says the severity.
+ *
+ * `now` is the server's render instant and is passed straight through to
+ * RelativeTime, which owns the "8m ago" label and keeps it current.
+ *
+ * The row is opaque: one glass layer per view, and the panel it sits in is
+ * already the glass. Stacking translucency desaturated the severity colors.
  */
 
 import {AlertTypeIcon} from './alert-type-icon';
+import {RelativeTime} from './relative-time-label';
 import type {AlertFeedItem, AlertSeverity, AlertType} from './sample-alerts';
 
 /**
@@ -40,20 +47,6 @@ const SEVERITY_GLOW: Record<AlertSeverity, {card: string; badge: string}> = {
 // uppercased by its own styling.
 const typeLabel = (type: AlertType) => type.replace(/_/g, " ");
 
-/**
- * "12m ago" / "3h ago" / "2d ago", measured against the instant the caller
- * passes in. The caller owns `now` so that a server render and its hydration
- * agree on what time it is.
- */
-export function relativeTime(receivedAt: string, now: Date): string {
-    const minutes = Math.floor((now.getTime() - new Date(receivedAt).getTime()) / 60_000);
-
-    if (minutes < 1) return "just now";
-    if (minutes < 60) return `${minutes}m ago`;
-    if (minutes < 60 * 24) return `${Math.floor(minutes / 60)}h ago`;
-    return `${Math.floor(minutes / (60 * 24))}d ago`;
-}
-
 export function AlertsFeed({alerts, now, emptyMessage}: {
     alerts: AlertFeedItem[];
     now: Date;
@@ -71,7 +64,7 @@ export function AlertsFeed({alerts, now, emptyMessage}: {
                 return (
                     <li
                         key={alert.id}
-                        className={`flex min-h-[72px] items-start gap-1 rounded-2xl border bg-surface/70 px-3 py-3 text-fg backdrop-blur-md ${glow.card}`}
+                        className={`flex min-h-[72px] items-start gap-1 rounded-2xl border bg-surface px-3 py-3 text-fg ${glow.card}`}
                     >
                         <span className={`grid size-10 shrink-0 place-items-center rounded-full text-accent-deep ${glow.badge}`}>
                             <AlertTypeIcon type={alert.type} />
@@ -92,12 +85,11 @@ export function AlertsFeed({alerts, now, emptyMessage}: {
                             <p className="mt-0.5 text-[13px] leading-[1.45] text-muted">{alert.body}</p>
 
                             {/* tabular-nums so the column of times doesn't shuffle as digits change. */}
-                            <time
-                                dateTime={alert.receivedAt}
+                            <RelativeTime
+                                receivedAt={alert.receivedAt}
+                                now={now}
                                 className="mt-1 block text-[11px] tabular-nums tracking-wide text-muted/80"
-                            >
-                                {relativeTime(alert.receivedAt, now)}
-                            </time>
+                            />
                         </div>
                     </li>
                 );
