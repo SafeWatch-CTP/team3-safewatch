@@ -9,33 +9,57 @@ away from their phone needs one screen that answers "what did I miss, and
 when" — the bell in the bottom nav leads there.
 
 ## Where it lives
-- `apps/web/app/alerts/page.tsx` — the route and its identity check
-- `apps/web/app/alerts/alerts-panel.tsx` — window selection and paging
+- `apps/web/app/alerts/page.tsx` — the route, its identity check, and the
+  first page of rows
+- `apps/web/app/alerts/alerts-panel.tsx` — the window switch and "show more",
+  which read `GET /api/v1/alerts`
 - `apps/web/app/alerts/alerts-feed.tsx` — the row card
 - `apps/web/app/alerts/relative-time.ts` — `relativeTime`, pure
 - `apps/web/app/alerts/relative-time-label.tsx` — the client component that
   keeps each row's "8m ago" current
 - `apps/web/app/alerts/alert-type-icon.tsx` — one glyph per emergency type
-- `apps/web/app/alerts/sample-alerts.ts` — `sampleAlerts(now)`, the
-  placeholder rows this screen reads until the user-scoped query exists
+- `packages/domain/src/queries/alerts.ts` — `listAlertFeed`, the user-scoped
+  query, and the `AlertFeedItem` shape it returns
+- `packages/domain/src/zod_schemas/alerts.ts` — `alertFeedQuerySchema`, which
+  validates the window, the page size and the cursor
+- `apps/web/app/api/v1/alerts/route.ts` — `GET`, serving the same list over
+  HTTP; its `POST` is [trigger-sos](trigger-sos.md)
 - `apps/web/app/globals.css` — the `--color-alert-*` severity tokens
 - `apps/web/components/bottom-nav.tsx` — the bell that links here
 
 ## Behavior
 - `/alerts` renders the alerts that reached the current user, newest first.
+- An alert reached a user when an `AlertLog` row exists with that user's id.
+  The feed reads those rows and the `Alert` each belongs to. A log addressed
+  to an emergency contact rather than to a user — every log
+  [trigger-sos](trigger-sos.md) writes — is not in anyone's feed.
+- Rows are ordered by `AlertLog.sentAt`, newest first, and that is also the
+  time the row displays. `receivedAt` is delivery tracking, is often null, and
+  is not what the feed shows.
+- A row's emergency type is its alert's incident category. An alert with no
+  incident behind it shows as `SOS` when it went to emergency contacts and
+  `OTHER` otherwise.
+- `AlertLog.readAt` is not read and not written here. Every alert in the
+  window is rendered the same whether or not it has been seen.
 - The acting user comes from the identity seam (see [auth](../auth.md)). A
   visitor with no session, or one whose session has expired, is redirected to
   `/` where signing in happens — the screen is never served signed-out, and no
   user id is read from the URL or the client.
 - The screen is `force-dynamic`: it is never served from a cached render.
 - A time window narrows the list. Two windows exist: **24 hours** (the
-  default) and **7 days**. An alert appears only when it arrived at or after
-  the window's cutoff.
-- At most **5** alerts are rendered at once. When the selected window holds
-  more, a button offers the next 5 and appends them in place. The button
-  states how many it will add and disappears once the window is exhausted.
-- Switching windows re-filters the list and returns paging to the first 5, so
-  a count is never carried across a differently sized list.
+  default) and **7 days**. An alert appears only when its `sentAt` is at or
+  after the window's cutoff.
+- **The window and the page size are applied in the query, never in the
+  browser.** A user's whole history is never sent to the client for the client
+  to hide most of it.
+- At most **5** alerts are fetched and rendered at once. When more exist in
+  the window, a button offers the next 5 and appends them in place; it
+  disappears once the window is exhausted.
+- Paging is by cursor, not by offset: the next page is "the rows older than
+  this one". An alert arriving between two pages therefore cannot shift the
+  boundary and cause a row to be served twice or skipped.
+- Switching windows starts the list again from the newest row, so a cursor is
+  never carried across a differently sized list.
 - A window holding no alerts says so in words naming that window, rather than
   rendering an empty list.
 - Each row shows: a glyph for its emergency type, the title, the type as a
@@ -48,6 +72,23 @@ when" — the bell in the bottom nav leads there.
   a card border in the same hue, and a soft glow beneath the card — and, because the pill is spent on the type, also by text
   only a screen reader reads.
 - Nothing on a row is interactive: the feed is read-only.
+
+### `GET /api/v1/alerts`
+
+- Serves the same rows as the screen, scoped the same way, for the same
+  current user. The screen's own "show more" reads it, so there is one code
+  path and not two.
+- Query parameters: `window` (`24h` or `7d`, default `24h`), `limit` (1–50,
+  default 5) and `cursor` (an `AlertLog` id). An unknown or malformed value is
+  a `400`, never a silent clamp to the default.
+- Returns `200` with `{ alerts: AlertFeedItem[], nextCursor: string | null }`.
+  `nextCursor` is null when the window holds nothing older.
+- A cursor that is not the caller's own row, or does not exist, returns `404`
+  — the same rule as [contact-management](../contact-management.md), and never
+  a `403`, which would confirm the row exists.
+- No session returns `401`. Every error carries the one shape,
+  `{ error: { code, message } }` ([web](../web.md)), and no Prisma error or
+  stack trace reaches a client.
 
 ## Examples
 
@@ -64,9 +105,26 @@ when" — the bell in the bottom nav leads there.
 | Alert arrived 2 days ago, 7-day window | `2d ago` |
 | Alert arrived 9 days ago, 7-day window | Not shown |
 | Alert of type `TRAFFIC_HAZARD` | Pill reads `TRAFFIC HAZARD`, cone glyph |
+| Another user's alert log | Never appears, in the screen or the API |
+| An SOS the user triggered | Not in their own feed — its logs belong to their contacts |
+| `GET /api/v1/alerts`, no session | `401` with `{ error: { code, message } }` |
+| `GET /api/v1/alerts?window=30d` | `400`; the window is not clamped to a default |
+| `GET /api/v1/alerts?limit=5`, 9 alerts in window | 5 rows and a `nextCursor` |
+| That cursor passed back | The remaining 4 and `nextCursor: null` |
+| A cursor belonging to another user | `404`, never `403` |
 
 ## Verify
 - `pnpm typecheck` and `pnpm test` pass.
+- **Ownership test.** Seed two users, each with alert logs, and assert the
+  feed and the API return only the caller's rows. Delete the `userId` filter
+  from the query and the test must fail — if it still passes, it is not
+  testing ownership.
+- **Window test.** Seed a log older than the window and assert it is absent,
+  and one inside it and assert it is present.
+- **Cursor test.** With 9 rows in the window, two pages return 5 then 4 with
+  no row repeated, and the second page's `nextCursor` is null.
+- `curl -s -o /dev/null -w "%{http_code}" localhost:3000/api/v1/alerts` with
+  no session cookie returns `401`.
 - `curl -s -o /dev/null -w "%{http_code}" localhost:3000/alerts` with no
   session cookie returns `307`, with `pnpm dev` running.
 - `grep -rE '\[#[0-9a-fA-F]{3,8}\]' apps/web/app apps/web/components` returns
@@ -82,12 +140,11 @@ when" — the bell in the bottom nav leads there.
   newest row's label advances on its own without a reload.
 
 ## Constraints & decisions
-- **The rows are placeholder data.** `sample-alerts.ts` holds a fixed set; no
-  database is read and no route is called. Every component is written against
-  the `AlertFeedItem` type alone, so the user-scoped query replaces one import
-  in `page.tsx` without touching the screen. Until then this spec describes a
-  shell, and the ownership rule it will have to satisfy — a user sees only
-  `AlertLog` rows whose `userId` is their own — is not yet enforced by code.
+- **Ownership is a query filter, not a check.** Every read is scoped by the
+  current user's id taken from the identity seam; no id arrives from the URL,
+  the body or the client. A cursor is matched on both its id and that user id,
+  so a foreign one matches zero rows and becomes a `404` rather than leaking
+  that it exists.
 - **The relative label is rendered twice from one instant, then corrected.**
   `page.tsx` takes a single `new Date()` and passes it to the window filter
   and to every row. Because the label is a pure function of the row's
@@ -99,16 +156,23 @@ when" — the bell in the bottom nav leads there.
   is what the server instant alone cannot do: a page left open overnight would
   otherwise still claim every alert arrived minutes ago. A visitor without
   JavaScript keeps the label as rendered.
-- **The placeholder rows are dated from that same instant.** `sampleAlerts()`
-  takes `now` and offsets from it, so both windows always hold rows. The
-  earlier version hung off a fixed `FEED_NOW`, which froze time to keep the
-  two renders in agreement; that is `RelativeTime`'s job now, and a fixed date
-  puts every sample row outside both windows within a week.
-- **Windowing and paging happen in the browser**, over an array already sent
-  to the client. That is honest for a fixed set and wrong for a real feed,
-  which pages server-side. [nearby-and-detail](../incidents/nearby-and-detail.md)
-  deliberately has no pagination at all, so a cursor here is a new pattern and
-  a decision, not a default.
+- **Paging is keyset, and that is a new pattern here.**
+  [nearby-and-detail](../incidents/nearby-and-detail.md) has no pagination at
+  all, so this is a decision rather than a default. Offset paging was rejected
+  because this list is ordered by arrival and grows at the end a reader starts
+  from: an alert arriving between two requests shifts every offset by one and
+  the reader silently loses a row. A cursor names a position in the data, so
+  it cannot drift.
+- **An SOS does not appear in the sender's own feed.** The logs
+  [trigger-sos](trigger-sos.md) writes carry `emergencyContactId`, never
+  `userId`, so nothing addresses the person who pressed the button. Changing
+  that is a change to that spec's behavior, not this one's, and until it
+  happens the feed of a user who has only ever sent SOS alerts is empty.
+- **The first screen is rendered on the server; later pages are fetched.**
+  `page.tsx` runs the query directly for the first 5 rows, so the feed is
+  complete in the HTML with no loading state and no request from the client.
+  The window switch and "show more" then call `GET /api/v1/alerts`, which is
+  why both the screen and the API read one query rather than two.
 - **Severity uses four `--color-alert-*` tokens**, which is the one standing
   exception to the single-hue palette, named in
   [design-system](../design-system.md). The hues are used for the badge fill,
@@ -122,12 +186,14 @@ when" — the bell in the bottom nav leads there.
   change to this spec.
 
 ## Out of scope
-- `GET /api/v1/alerts` and the user-scoped query behind it — no spec yet; this
-  screen reads placeholder rows until one exists.
 - The short "Your alerts" strip on the home page, which reuses this feed's row
   — no spec yet.
 - Marking an alert read or dismissing one. `AlertLog.readAt` exists and is
-  never written.
+  still never written, and dismissing has no column at all — it needs a
+  migration adding `dismissedAt`, its own issue and its own spec section.
+  When it lands, this feed's query gains a filter it does not have today.
+- Writing an `AlertLog` for the user who triggers an SOS, which would put
+  their own SOS in their feed — [trigger-sos](trigger-sos.md) owns that.
 - Delivering alerts over SMS, push or in-app. Raising one is
   [trigger-sos](trigger-sos.md); moving a delivery log past `PENDING` is worker
   behavior with no spec yet.
