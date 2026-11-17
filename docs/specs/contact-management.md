@@ -21,7 +21,8 @@ Users need a personal emergency-contact list so a panic flow can notify trusted 
   - Required fields are `firstName`, `lastName`, `phoneNumber`; `email`, `relationship`, and `isPrimary` are optional (`isPrimary` defaults to `false`).
   - When `isPrimary` is true, any existing primary contact for that user is reset to `false` in the same transaction before the new record is created.
 - `PUT /api/v1/contacts/:id` replaces all fields of one of the current user's contacts, validated with `UpdateContactSchema`, and returns `200` with the updated contact.
-- `DELETE /api/v1/contacts/:id` removes one of the current user's contacts and returns `204` with no body.
+- `DELETE /api/v1/contacts/:id` removes one of the current user's contacts and returns `204` with no body. The row is deleted outright: `EmergencyContact` has no `deletedAt`, so there is no soft-delete path.
+- The contacts screen reaches delete from the edit sheet, behind a two-step confirm that names the contact and states that they stop being notified on SOS. Deleting refreshes the list and closes the sheet. The control is `muted`, never red, because red belongs to SOS.
 - A contact id that does not exist or belongs to another user returns `404` for both `PUT` and `DELETE`, never `403`.
 - Validation failures return `400`. Unknown or invalid auth state returns `401`. Anything unexpected returns `500`.
 - Every error has the shape `{ error: { code, message } }`; raw Prisma errors and stack traces never reach the client.
@@ -38,11 +39,14 @@ Users need a personal emergency-contact list so a panic flow can notify trusted 
 | `PUT` with a valid body for own contact | Returns 200 with the updated contact |
 | `PUT` or `DELETE` with another user's contact id | Returns 404 and nothing changes |
 | `DELETE` own contact | Returns 204; the contact no longer appears in `GET` |
+| Delete confirmed in the edit sheet | The contact is removed, the list refreshes, and the sheet closes |
+| Delete dismissed with "Keep" | Nothing is sent and the contact is unchanged |
 | No authenticated user | Returns 401 |
 
 ## Verify
 - Run `pnpm vitest run tests/integration/contact-create.test.ts`.
 - Manual check with `pnpm dev` running: sign in with GitHub, then create/list contacts in that browser session. Confirm that signed-out API requests return `401`, and that another user's contact id returns `404` when used for `DELETE`.
+- Delete drill: with at least two contacts, press Edit, tap a contact, press "Remove this contact", then "Keep" — the contact is still there and no request was sent. Repeat and press "Remove contact" — the sheet closes and the row is gone without a page reload.
 
 ## Constraints & decisions
 - Contact ownership is enforced by filtering every query on both the contact id and the current user id; update and delete use `updateMany`/`deleteMany` so a foreign or missing id affects zero rows and maps to `404`.
