@@ -22,4 +22,5 @@ that supersedes the old one.
 | 0012 | [Upstash Redis as a cloud dependency with no local stand-in](0012-upstash-redis-cloud-dependency.md) | Proposed |
 | 0013 | [The platform's readiness probe decides when a revision gets traffic](0013-readiness-probe-gates-traffic.md) | Proposed |
 | 0014 | [Migrations run in a Container Apps Job before each deploy](0014-migrate-in-a-container-apps-job.md) | Proposed |
+| 0015 | [Relationship is not carried by color on the contacts list](0015-relationship-color-on-contacts.md) | Proposed |
 EOF
