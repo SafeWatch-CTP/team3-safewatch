@@ -80,8 +80,10 @@ model AlertLog {
     sentAt DateTime @default(now())
     receivedAt DateTime?
     readAt DateTime?
+    dismissedAt DateTime? //Set when the recipient clears the alert from their feed
 
     @@index([userId, readAt]) //
+    @@index([userId, dismissedAt]) //The feed reads undismissed logs for one user
     @@index([alertId]) //Fast lookup of all logs for a given alert
     @@index([emergencyContactId]) //Fast lookup of all delivery logs for a specific emergency contact
 }

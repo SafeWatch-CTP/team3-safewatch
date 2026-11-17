@@ -3,53 +3,101 @@
 /**
  * THE ALERTS SCREEN'S GLASS PANEL
  *
- * Owns the two pieces of state the feed needs and nothing else:
- *  - which time window is selected (24 hours / 7 days)
- *  - how many rows of that window are on screen
- *
- * Needs "use client" for useState. The rows themselves are rendered by
+ * Owns the feed's client state: which window is selected, the rows on screen,
+ * and where the next page resumes. The rows themselves are rendered by
  * AlertsFeed, which stays presentational.
  *
- * Both lists are derived from the same `alerts` prop, so switching windows
- * resets paging rather than carrying a count across a different-sized list.
+ * The first page arrives as a prop, already queried on the server, so the feed
+ * is complete in the HTML with no loading state. Everything after that — the
+ * other window, the next page, dismissing a row — goes through
+ * GET/PATCH /api/v1/alerts, so the screen and the API exercise one code path
+ * rather than two. See docs/specs/alerts/alert-feed.md.
  *
  * The window switch is a pair of aria-pressed buttons, not a tablist — the
  * known, accepted deviation for a two-item switch in
  * docs/specs/design-system.md, matching the Add/Contacts toggle.
  */
 
-import {useMemo, useState} from 'react';
+import type {AlertFeedItem, AlertFeedPage} from '@project/domain';
+import {useState, useTransition} from 'react';
 import {AlertsFeed} from './alerts-feed';
-import type {AlertFeedItem} from './sample-alerts';
 
 const PAGE_SIZE = 5;
 
-type WindowId = 'day' | 'week';
+type WindowId = '24h' | '7d';
 
-const WINDOWS: {id: WindowId; label: string; days: number; empty: string}[] = [
-    {id: 'day', label: '24 hours', days: 1, empty: "No alerts in the last 24 hours."},
-    {id: 'week', label: '7 days', days: 7, empty: "No alerts in the last 7 days."},
+const WINDOWS: {id: WindowId; label: string; empty: string}[] = [
+    {id: '24h', label: '24 hours', empty: "No alerts in the last 24 hours."},
+    {id: '7d', label: '7 days', empty: "No alerts in the last 7 days."},
 ];
 
-export function AlertsPanel({alerts, now}: {alerts: AlertFeedItem[]; now: Date}) {
-    const [windowId, setWindowId] = useState<WindowId>('day');
-    const [visible, setVisible] = useState(PAGE_SIZE);
+async function fetchPage(window: WindowId, cursor?: string): Promise<AlertFeedPage> {
+    const params = new URLSearchParams({window, limit: String(PAGE_SIZE)});
+    if (cursor) params.set("cursor", cursor);
+
+    const res = await fetch(`/api/v1/alerts?${params}`);
+    if (!res.ok) throw new Error("feed");
+
+    return res.json();
+}
+
+export function AlertsPanel({initial, now}: {initial: AlertFeedPage; now: Date}) {
+    const [windowId, setWindowId] = useState<WindowId>('24h');
+    const [page, setPage] = useState<AlertFeedPage>(initial);
+    const [failed, setFailed] = useState(false);
+    const [pending, startTransition] = useTransition();
 
     const active = WINDOWS.find((item) => item.id === windowId) ?? WINDOWS[0];
 
-    const inWindow = useMemo(() => {
-        const cutoff = now.getTime() - active.days * 24 * 60 * 60_000;
-        return alerts
-            .filter((alert) => new Date(alert.receivedAt).getTime() >= cutoff)
-            .sort((a, b) => b.receivedAt.localeCompare(a.receivedAt));
-    }, [alerts, active.days, now]);
+    function load(next: WindowId, cursor?: string) {
+        setFailed(false);
 
-    const shown = inWindow.slice(0, visible);
-    const remaining = inWindow.length - shown.length;
+        startTransition(async () => {
+            try {
+                const result = await fetchPage(next, cursor);
+
+                setPage((current) =>
+                    cursor
+                        // Appending: the cursor page continues the list on screen.
+                        ? {alerts: [...current.alerts, ...result.alerts], nextCursor: result.nextCursor}
+                        : result
+                );
+            } catch {
+                setFailed(true);
+            }
+        });
+    }
 
     function selectWindow(next: WindowId) {
+        if (next === windowId) return;
+
         setWindowId(next);
-        setVisible(PAGE_SIZE);
+        // A cursor belongs to the window it came from, so the new window
+        // starts again from its newest row.
+        load(next);
+    }
+
+    /** Both row actions are the same request; only the body differs. */
+    async function updateAlert(id: string, change: {read?: true; dismissed?: true}) {
+        const res = await fetch(`/api/v1/alerts/${id}`, {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(change),
+        });
+
+        if (!res.ok) {
+            setFailed(true);
+            return;
+        }
+
+        setPage((current) => ({
+            ...current,
+            alerts: change.dismissed
+                ? current.alerts.filter((alert) => alert.id !== id)
+                : current.alerts.map((alert) =>
+                      alert.id === id ? {...alert, unread: false} : alert
+                  ),
+        }));
     }
 
     return (
@@ -78,15 +126,32 @@ export function AlertsPanel({alerts, now}: {alerts: AlertFeedItem[]; now: Date})
                 ))}
             </div>
 
-            <AlertsFeed alerts={shown} now={now} emptyMessage={active.empty} />
+            {/* aria-busy rather than a spinner that replaces the list: the rows
+                already on screen stay readable while the next page loads. */}
+            <div aria-busy={pending}>
+                <AlertsFeed
+                    alerts={page.alerts}
+                    now={now}
+                    emptyMessage={active.empty}
+                    onRead={(id) => updateAlert(id, {read: true})}
+                    onDismiss={(id) => updateAlert(id, {dismissed: true})}
+                />
+            </div>
 
-            {remaining > 0 && (
+            {failed && (
+                <p role="status" className="text-sm text-muted">
+                    Could not reach the server. Check your connection and try again.
+                </p>
+            )}
+
+            {page.nextCursor && (
                 <button
                     type="button"
-                    onClick={() => setVisible(visible + PAGE_SIZE)}
-                    className="w-full rounded-full border border-accent/15 bg-accent/10 px-4 py-2.5 text-sm font-medium text-accent transition-colors hover:bg-accent/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                    disabled={pending}
+                    onClick={() => load(windowId, page.nextCursor ?? undefined)}
+                    className="w-full rounded-full border border-accent/15 bg-accent/10 px-4 py-2.5 text-sm font-medium text-accent transition-colors hover:bg-accent/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50"
                 >
-                    Show {Math.min(remaining, PAGE_SIZE)} more
+                    {pending ? "Loading..." : `Show ${PAGE_SIZE} more`}
                 </button>
             )}
         </div>

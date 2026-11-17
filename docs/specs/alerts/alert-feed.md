@@ -39,8 +39,14 @@ when" — the bell in the bottom nav leads there.
 - A row's emergency type is its alert's incident category. An alert with no
   incident behind it shows as `SOS` when it went to emergency contacts and
   `OTHER` otherwise.
-- `AlertLog.readAt` is not read and not written here. Every alert in the
-  window is rendered the same whether or not it has been seen.
+- An alert the user has not marked read carries an unread dot. Reading is
+  `AlertLog.readAt`; the dot is gone once it is set.
+- A dismissed alert leaves the feed. Dismissing is `AlertLog.dismissedAt`, a
+  separate column from `readAt`, because a read alert stays and a dismissed
+  one does not.
+- Dismissing an alert also marks it read: it cannot be cleared without having
+  been seen, and leaving it unread would keep it counted as missed.
+- Both are one-way. Nothing on this screen un-reads or restores an alert.
 - The acting user comes from the identity seam (see [auth](../auth.md)). A
   visitor with no session, or one whose session has expired, is redirected to
   `/` where signing in happens — the screen is never served signed-out, and no
@@ -71,7 +77,10 @@ when" — the bell in the bottom nav leads there.
 - Severity is carried by color — a badge filled with that severity's hue,
   a card border in the same hue, and a soft glow beneath the card — and, because the pill is spent on the type, also by text
   only a screen reader reads.
-- Nothing on a row is interactive: the feed is read-only.
+- A row carries two controls: **Mark read**, shown only while the alert is
+  unread, and **Dismiss**. Each names its alert to a screen reader, because
+  "Dismiss" repeated down a list says nothing about which alert it clears.
+- Nothing else on a row is interactive, and the row itself is not a target.
 
 ### `GET /api/v1/alerts`
 
@@ -86,6 +95,16 @@ when" — the bell in the bottom nav leads there.
 - A cursor that is not the caller's own row, or does not exist, returns `404`
   — the same rule as [contact-management](../contact-management.md), and never
   a `403`, which would confirm the row exists.
+
+### `PATCH /api/v1/alerts/:id`
+
+- The id is an `AlertLog` id — the row addressed to this user, not the `Alert`
+  itself, which may have reached many people.
+- Body is `{ read?: true }`, `{ dismissed?: true }` or both. `false` is a
+  `400`: there is no screen for undoing either, and accepting it would imply
+  there is. A body asking for nothing is also a `400`.
+- Returns `204` with no body. An id that is not the caller's own, or does not
+  exist, returns `404`.
 - No session returns `401`. Every error carries the one shape,
   `{ error: { code, message } }` ([web](../web.md)), and no Prisma error or
   stack trace reaches a client.
@@ -112,6 +131,11 @@ when" — the bell in the bottom nav leads there.
 | `GET /api/v1/alerts?limit=5`, 9 alerts in window | 5 rows and a `nextCursor` |
 | That cursor passed back | The remaining 4 and `nextCursor: null` |
 | A cursor belonging to another user | `404`, never `403` |
+| An alert not yet marked read | Unread dot, and a Mark read control |
+| `PATCH` `{ read: true }` on own alert | `204`; the row stays, the dot goes |
+| `PATCH` `{ dismissed: true }` on own alert | `204`; the row leaves the feed and is marked read |
+| `PATCH` `{ read: false }` | `400` — reading is one-way |
+| `PATCH` on another user's alert | `404`, and nothing changes |
 
 ## Verify
 - `pnpm typecheck` and `pnpm test` pass.
@@ -123,6 +147,12 @@ when" — the bell in the bottom nav leads there.
   and one inside it and assert it is present.
 - **Cursor test.** With 9 rows in the window, two pages return 5 then 4 with
   no row repeated, and the second page's `nextCursor` is null.
+- **State tests.** `read` sets `readAt` and leaves `dismissedAt` null;
+  `dismissed` sets both; another user's id returns `404` and changes neither
+  column. `tests/integration/alert-feed.test.ts` and `alert-state.test.ts`.
+- **Seeded feed.** `pnpm db:seed` gives every user nine alerts — five inside
+  24 hours, three more inside 7 days, one outside both — so the window drill
+  and the paging drill both have something to prove.
 - `curl -s -o /dev/null -w "%{http_code}" localhost:3000/api/v1/alerts` with
   no session cookie returns `401`.
 - `curl -s -o /dev/null -w "%{http_code}" localhost:3000/alerts` with no
@@ -163,6 +193,11 @@ when" — the bell in the bottom nav leads there.
   from: an alert arriving between two requests shifts every offset by one and
   the reader silently loses a row. A cursor names a position in the data, so
   it cannot drift.
+- **Dismissing is its own column, not a second meaning for `readAt`.** Two
+  states exist because they answer different questions — "have I seen this"
+  and "do I still want it on screen" — and collapsing them would make a read
+  alert disappear. The migration adds `dismissedAt` and the index
+  `[userId, dismissedAt]`, which is the shape of the feed's own query.
 - **An SOS does not appear in the sender's own feed.** The logs
   [trigger-sos](trigger-sos.md) writes carry `emergencyContactId`, never
   `userId`, so nothing addresses the person who pressed the button. Changing
@@ -188,10 +223,10 @@ when" — the bell in the bottom nav leads there.
 ## Out of scope
 - The short "Your alerts" strip on the home page, which reuses this feed's row
   — no spec yet.
-- Marking an alert read or dismissing one. `AlertLog.readAt` exists and is
-  still never written, and dismissing has no column at all — it needs a
-  migration adding `dismissedAt`, its own issue and its own spec section.
-  When it lands, this feed's query gains a filter it does not have today.
+- Un-reading or restoring a dismissed alert. Both state changes are one-way
+  and there is no screen for reversing either.
+- A count of unread alerts anywhere outside this screen — the bell in the nav
+  carries no badge.
 - Writing an `AlertLog` for the user who triggers an SOS, which would put
   their own SOS in their feed — [trigger-sos](trigger-sos.md) owns that.
 - Delivering alerts over SMS, push or in-app. Raising one is

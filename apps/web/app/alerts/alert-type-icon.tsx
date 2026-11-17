@@ -4,9 +4,9 @@
  * Every glyph is aria-hidden: the row's pill already names the type.
  */
 
-import type {AlertType} from './sample-alerts';
+import type {AlertFeedType} from '@project/domain';
 
-const PATHS: Record<AlertType, React.ReactNode> = {
+const PATHS: Record<AlertFeedType, React.ReactNode> = {
     SOS: (
         <>
             <path d="M12 3.2 19 6v5.2c0 4.4-2.9 8.2-7 9.6-4.1-1.4-7-5.2-7-9.6V6l7-2.8Z" />
@@ -62,7 +62,7 @@ const PATHS: Record<AlertType, React.ReactNode> = {
     ),
 };
 
-export function AlertTypeIcon({type, size = 22}: {type: AlertType; size?: number}) {
+export function AlertTypeIcon({type, size = 22}: {type: AlertFeedType; size?: number}) {
     return (
         <svg
             aria-hidden="true"
