@@ -1,0 +1,16 @@
+-- Removes Incident."userId" from databases that still have it.
+--
+-- 20260916042543_add_user_id_to_incidents added the column as NOT NULL. That
+-- migration was deleted from the repo in 7abb39d as having been committed by
+-- accident, but deleting a migration file cannot undo a migration that has
+-- already run: every database that applied it kept the column, and every
+-- database created afterwards never had it. The result is one repo and two
+-- different Incident tables, where creating an incident passes the tests and
+-- fails on the machines carrying the column.
+--
+-- Forward-only, per the append-only rule in AGENTS.md: the old migration stays
+-- deleted and this one repairs what it left behind.
+--
+-- IF EXISTS makes this a no-op on a database built after the deletion, so it
+-- is safe everywhere and needs no coordination.
+ALTER TABLE "Incident" DROP COLUMN IF EXISTS "userId";
