@@ -12,15 +12,23 @@ export type ContactFormValues = {
     isPrimary?: boolean;
 };
 
-export function ContactForm({initial, onSaved}: {initial?: ContactFormValues & {id:string}; onSaved: () => void}) {
+export function ContactForm({initial, onSaved, onDeleted}: {
+    initial?: ContactFormValues & {id:string};
+    onSaved: () => void;
+    onDeleted?: () => void;
+}) {
     const [firstName, setFirstName] = useState(initial?.firstName ?? "");
     const [lastName, setLastName] = useState(initial?.lastName ?? "");
     const [phoneNumber, setPhoneNumber] = useState(initial?.phoneNumber ?? "");
     const [email, setEmail] = useState(initial?.email ?? "");
     const [relationship, setRelationship] = useState(initial?.relationship ?? "");
     const [isPrimary, setIsPrimary] = useState(initial?.isPrimary ?? false);
-    const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
+    const [status, setStatus] = useState<"idle" | "saving" | "deleting" | "error">("idle");
     const [message, setMessage] = useState<string | null>(null);
+    // Delete is two-step rather than immediate. A nested <dialog> inside the
+    // sheet would also work, but swapping these buttons in place keeps the
+    // contact's name in front of the person doing the deleting.
+    const [confirmingDelete, setConfirmingDelete] = useState(false);
     const router = useRouter();
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -74,6 +82,36 @@ export function ContactForm({initial, onSaved}: {initial?: ContactFormValues & {
         }
        
     }
+
+    async function handleDelete() {
+        if (!initial) return;
+
+        setStatus("deleting");
+        setMessage(null);
+
+        try {
+            const res = await fetch(`/api/v1/contacts/${initial.id}`, {method: "DELETE"});
+
+            // 204 carries no body, so only a failure has one to read.
+            if (!res.ok) {
+                const body = await res.json().catch(() => null);
+                setMessage(body?.error?.message ?? "Could not delete this contact.");
+                setStatus("error");
+                setConfirmingDelete(false);
+                return;
+            }
+
+            setStatus("idle");
+            router.refresh();
+            (onDeleted ?? onSaved)();
+        } catch {
+            setMessage("Could not reach the server. Check your connection and try again.");
+            setStatus("error");
+            setConfirmingDelete(false);
+        }
+    }
+
+    const busy = status === "saving" || status === "deleting";
 
     return (
         <div>
@@ -168,9 +206,51 @@ export function ContactForm({initial, onSaved}: {initial?: ContactFormValues & {
                     </label>
                 </div>
                     <button type="submit" 
-                    disabled={status === "saving" || !firstName.trim() || !lastName.trim() || !phoneNumber.trim()} 
+                    disabled={busy || !firstName.trim() || !lastName.trim() || !phoneNumber.trim()} 
                     className="bg-linear-to-r from-accent to-accent-deep text-white hover:brightness-110 focus-visible:ring-4 focus-visible:outline-none focus-visible:ring-accent/30 font-medium text-sm px-4 py-2.5 text-center leading-5 rounded-2xl transition active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:brightness-100">Save Contact</button>
             </form>
+
+            {/* Only an existing contact can be deleted, so this is absent on
+                the Add tab. Deleting is destructive but not an emergency:
+                `muted`, never red, so red keeps meaning SOS. */}
+            {initial && (
+                <div className="mt-4 border-t border-border pt-4">
+                    {confirmingDelete ? (
+                        <div role="group" aria-labelledby="delete-confirm-label" className="flex flex-col gap-3">
+                            <p id="delete-confirm-label" className="text-sm text-muted">
+                                Remove <span className="font-semibold text-fg">{initial.firstName} {initial.lastName}</span> from your contacts? They will stop being notified when you press SOS.
+                            </p>
+                            <div className="flex gap-2">
+                                <button
+                                    type="button"
+                                    onClick={handleDelete}
+                                    disabled={busy}
+                                    className="flex-1 rounded-2xl bg-muted px-4 py-2.5 text-sm font-medium leading-5 text-white transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:brightness-110 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    {status === "deleting" ? "Removing..." : "Remove contact"}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setConfirmingDelete(false)}
+                                    disabled={busy}
+                                    className="flex-1 rounded-2xl border border-border bg-surface px-4 py-2.5 text-sm font-medium leading-5 text-fg transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:bg-tint active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                    Keep
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => setConfirmingDelete(true)}
+                            disabled={busy}
+                            className="w-full rounded-2xl border border-border bg-surface px-4 py-2.5 text-sm font-medium leading-5 text-muted transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent hover:bg-tint hover:text-fg active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            Remove this contact
+                        </button>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

@@ -73,7 +73,7 @@ export function SosButton() {
                 onClick={() => setOpen(!open)}
                 aria-haspopup="dialog"
                 aria-label="Emergency options"
-                className="relative z-10 size-[60px] rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white  bg-linear-to-b from-red-500 to-red-700 font-display text-sm font-extrabold tracking-wide text-white ring-2 ring-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.3),inset_0_-2px_6px_rgba(127,29,29,0.35),0_4px_10px_rgba(16,48,127,0.45)] transition-transform active:scale-95"
+                className="relative z-10 size-[60px] rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white bg-[radial-gradient(circle_at_50%_25%,var(--color-sos-hot),var(--color-danger)_65%,var(--color-sos-shade))] font-display text-sm font-extrabold tracking-wide text-white ring-2 ring-white/25 shadow-[inset_0_1px_0_rgba(255,255,255,0.3),inset_0_-2px_6px_rgba(127,29,29,0.35),0_0_16px_rgba(220,38,38,0.35),0_4px_10px_rgba(16,48,127,0.45)] transition-transform active:scale-95"
             >SOS</button>
 
             <dialog

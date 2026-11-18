@@ -43,7 +43,7 @@ export default async function ContactsPage() {
     const contacts = await listEmergencyContacts(userId);
 
     return(
-        <main className= "px-2 pt-2 pb-6 space-y-6">
+        <main className= "px-2 pt-2 space-y-6">
             <ContactsToggle contacts = {contacts} />
         </main>
     );

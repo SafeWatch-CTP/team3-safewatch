@@ -11,10 +11,13 @@ when" — the bell in the bottom nav leads there.
 ## Where it lives
 - `apps/web/app/alerts/page.tsx` — the route and its identity check
 - `apps/web/app/alerts/alerts-panel.tsx` — window selection and paging
-- `apps/web/app/alerts/alerts-feed.tsx` — the row card and `relativeTime`
+- `apps/web/app/alerts/alerts-feed.tsx` — the row card
+- `apps/web/app/alerts/relative-time.ts` — `relativeTime`, pure
+- `apps/web/app/alerts/relative-time-label.tsx` — the client component that
+  keeps each row's "8m ago" current
 - `apps/web/app/alerts/alert-type-icon.tsx` — one glyph per emergency type
-- `apps/web/app/alerts/sample-alerts.ts` — the placeholder rows this screen
-  reads until the user-scoped query exists
+- `apps/web/app/alerts/sample-alerts.ts` — `sampleAlerts(now)`, the
+  placeholder rows this screen reads until the user-scoped query exists
 - `apps/web/app/globals.css` — the `--color-alert-*` severity tokens
 - `apps/web/components/bottom-nav.tsx` — the bell that links here
 
@@ -74,6 +77,9 @@ when" — the bell in the bottom nav leads there.
   outline, and the rows themselves take no focus because nothing on them acts.
 - **Window drill.** With the 24-hour window selected, switch to 7 days and
   back: the list grows and shrinks, and paging returns to 5 each time.
+- **Clock drill.** Load `/alerts` and watch the console through hydration:
+  no mismatch warning. Leave the page open past a minute boundary and the
+  newest row's label advances on its own without a reload.
 
 ## Constraints & decisions
 - **The rows are placeholder data.** `sample-alerts.ts` holds a fixed set; no
@@ -82,11 +88,22 @@ when" — the bell in the bottom nav leads there.
   in `page.tsx` without touching the screen. Until then this spec describes a
   shell, and the ownership rule it will have to satisfy — a user sees only
   `AlertLog` rows whose `userId` is their own — is not yet enforced by code.
-- **The clock is frozen.** Relative timestamps are rendered on the server and
-  hydrated on the client; a clock that moves between the two renders different
-  text in each, which React reports as a hydration mismatch. Placeholder data
-  stands still to avoid it. A real feed cannot, and will need the row's own
-  timestamp to settle it.
+- **The relative label is rendered twice from one instant, then corrected.**
+  `page.tsx` takes a single `new Date()` and passes it to the window filter
+  and to every row. Because the label is a pure function of the row's
+  timestamp and that instant, the server's HTML and React's first client
+  render are computed from identical inputs and cannot disagree — the
+  hydration mismatch that a live `Date()` on each side would produce never
+  arises, and no `suppressHydrationWarning` is needed. `RelativeTime` then
+  recomputes against the browser's clock on mount and every 30 seconds, which
+  is what the server instant alone cannot do: a page left open overnight would
+  otherwise still claim every alert arrived minutes ago. A visitor without
+  JavaScript keeps the label as rendered.
+- **The placeholder rows are dated from that same instant.** `sampleAlerts()`
+  takes `now` and offsets from it, so both windows always hold rows. The
+  earlier version hung off a fixed `FEED_NOW`, which froze time to keep the
+  two renders in agreement; that is `RelativeTime`'s job now, and a fixed date
+  puts every sample row outside both windows within a week.
 - **Windowing and paging happen in the browser**, over an array already sent
   to the client. That is honest for a fixed set and wrong for a real feed,
   which pages server-side. [nearby-and-detail](../incidents/nearby-and-detail.md)

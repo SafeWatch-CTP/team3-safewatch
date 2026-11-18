@@ -30,6 +30,25 @@
   --color-success: #16a34a;
   --color-danger: #dc2626;
 
+  /* The SOS face is lit from above: hot at the top, danger through the
+     middle, shade at the bottom edge. Red still belongs to SOS alone. */
+  --color-sos-hot: #ff4d4d;
+  --color-sos-shade: #991b1b;
+
+  /* The bottom of the nav dock's gradient. accent-deep is its top. */
+  --color-nav-deep: #0a1742;
+
+  /* Every contact row shares one tint — the badge, the avatar fill and the
+     initials. Relationship is not carried by color; the badge's wording
+     carries it, which is the only thing that ever distinguished one pale
+     blue from another at 10px. Depth separated family from everyone else for
+     one revision and was dropped: see ADR-0015 for both attempts.
+     `deep` is the text, ring and initials color for `tint` and for no other
+     ground — 8.2:1 together, and 1.8:1 against the #fff row, which is the
+     measurement that keeps the badge visible as a badge. */
+  --color-rel-tint: #93c5fd;
+  --color-rel-deep: #172554;
+
   /* Alert severity — pale, luminous accents that glow against the navy alert
      cards in the feed. These are the one deliberate exception to the
      single-hue rule above: a feed has to separate four severities at a
