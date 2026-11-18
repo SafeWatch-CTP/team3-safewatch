@@ -43,7 +43,10 @@ tests use in-memory PGlite.
   filter it.
 - **History is transactional**: a write that implies an event writes both
   in one transaction.
-- **Migrations are append-only.** Never edit an applied migration.
+- **Migrations are append-only.** Never edit an applied migration, and
+  never delete one that has shipped — a migration someone has already run
+  cannot be taken back by removing the file, only repaired by a new one
+  (see `docs/postmortems/2026-11-17-deleted-migration-left-a-column-behind.md`).
 - **Errors have one shape**: `{ error: { code, message } }` — see
   `docs/specs/web.md`. Raw errors never reach a client.
 - **Tests that can't fail don't count.** If a test passes with the feature

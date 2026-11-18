@@ -21,7 +21,7 @@ export function IncidentMapSection({
       <h2 id={HEADING_ID} className="text-lg font-semibold">
         Incident map
       </h2>
-      <p id={HELP_ID} className="text-sm text-neutral-700">
+      <p id={HELP_ID} className="text-sm text-muted">
         {mapSummary(incidents.length)}
         {incidents.length > 0 && " Each pin opens its details; the list below has the same incidents."}{" "}
         Arrow keys pan the map, and plus and minus zoom.
@@ -50,7 +50,7 @@ export function IncidentMapSection({
 
       <a
         href={`#${listId}`}
-        className="sr-only focus:not-sr-only focus:inline-block focus:rounded focus:bg-neutral-900 focus:px-3 focus:py-1.5 focus:text-sm focus:font-medium focus:text-white"
+        className="sr-only focus:not-sr-only focus:inline-block focus:rounded focus:bg-accent-deep focus:px-3 focus:py-1.5 focus:text-sm focus:font-medium focus:text-white"
       >
         Skip map to incident list
       </a>

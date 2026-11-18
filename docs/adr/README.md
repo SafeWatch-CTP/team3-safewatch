@@ -20,4 +20,6 @@ that supersedes the old one.
 | 0010 | [Reviewer-agent lifecycle and authority](0010-reviewer-agent-lifecycle.md) | Accepted |
 | 0011 | [Ideation pipeline + @research subagent](0011-ideation-pipeline.md) | Accepted |
 | 0012 | [Upstash Redis as a cloud dependency with no local stand-in](0012-upstash-redis-cloud-dependency.md) | Proposed |
+| 0013 | [The platform's readiness probe decides when a revision gets traffic](0013-readiness-probe-gates-traffic.md) | Proposed |
+| 0014 | [Migrations run in a Container Apps Job before each deploy](0014-migrate-in-a-container-apps-job.md) | Proposed |
 EOF

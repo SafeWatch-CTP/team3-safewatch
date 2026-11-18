@@ -19,7 +19,7 @@ export function ContactsList({contacts, editMode, onSelect}: {
                 {contacts.map((contact) =>
                   <li
                     key = {contact.id}
-                    className= {`relative flex min-h-[72px] items-center gap-1 rounded-2xl px-3 py-3 border border-white/70 bg-surface/70 text-fg shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_3px_rgba(47,85,232,0.08)] backdrop-blur-md transition ${editMode ? "ring-2 ring-accent shadow-[0_2px_12px_rgba(30,63,196,0.18)]" : ""}`}
+                    className= {`relative flex min-h-[72px] items-center gap-1 rounded-2xl px-3 py-3 border border-white/70 bg-surface/70 text-fg shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_1px_3px_rgba(54,88,231,0.08)] backdrop-blur-md transition ${editMode ? "ring-2 ring-accent shadow-[0_2px_12px_rgba(38,59,152,0.18)]" : ""}`}
                     >
                     {editMode && (
                         <button

@@ -43,13 +43,13 @@ class Boundary extends Component<BoundaryProps, { failed: boolean }> {
     // No error details: in production they're redacted, and raw errors never
     // reach the user (docs/specs/web.md).
     return (
-      <div role="alert" className="space-y-3 rounded-lg border border-red-200 bg-red-50 p-6">
-        <p className="font-semibold text-red-900">Couldn&apos;t load {this.props.title}.</p>
-        <p className="text-sm text-red-800">Check your connection, then try again.</p>
+      <div role="alert" className="space-y-3 rounded-lg border border-border bg-panel p-6">
+        <p className="font-semibold text-fg">Couldn&apos;t load {this.props.title}.</p>
+        <p className="text-sm text-muted">Check your connection, then try again.</p>
         <button
           type="button"
           onClick={() => this.props.onRetry(() => this.setState({ failed: false }))}
-          className="rounded bg-red-700 px-3 py-1.5 text-sm font-medium text-white"
+          className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-strong"
         >
           Try again
         </button>

@@ -14,7 +14,7 @@ export function RefreshButton({ label, pendingLabel }: { label: string; pendingL
       type="button"
       onClick={() => startTransition(() => router.refresh())}
       disabled={pending}
-      className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+      className="rounded bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-strong disabled:opacity-50"
     >
       {pending ? pendingLabel : label}
     </button>
