@@ -31,14 +31,14 @@ pointer doesn't lose anything.
 - `apps/web/app/_components/incident-map-model.ts`: pure helpers for the
   severity styles, pin names, labels and initial view
 - `apps/web/app/globals.css`: pin, focus-ring and popup styles
-- `packages/domain/src/queries/incidents.ts`: `listActiveIncidents` returns
-  `latitude` and `longitude` on each item
+- `packages/domain/src/queries/incidents.ts`: `listRecentIncidents` returns
+  the newest active incidents and their coordinates for the home page
 
 ## Behavior
 **Data**
 - The map shows exactly the incidents in the feed: the same
-  `listActiveIncidents()` call, the same items, in the same order. Each item
-  has `latitude` and `longitude`.
+  `listRecentIncidents()` call, the same newest-first items (up to 50), in the
+  same order. Each item has `latitude` and `longitude`.
 - The page sends the client only the fields the map uses: `id`, `title`,
   `severity`, `category`, `address`, `latitude` and `longitude`.
 
@@ -154,9 +154,9 @@ link styles and focus handling are not relied on for this.
     retry card appears; restart it and press "Try again".
 
 ## Constraints & decisions
-- The map uses `listActiveIncidents` (city-wide, at most 25 items, most
-  severe first), not the nearby route. That way it works on a fresh clone
-  without Upstash and always matches the list. Switching to
+- The map uses `listRecentIncidents` (city-wide, at most 50 items, newest
+  first), not the nearby route. That way it works on a fresh clone without
+  Upstash and matches the Feed tab. Switching to
   `/api/v1/incidents/nearby` around the user's location is a behavior change
   to this spec.
 - The list is the text alternative for the map. Information shown only on

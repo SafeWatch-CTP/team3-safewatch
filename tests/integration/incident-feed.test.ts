@@ -95,8 +95,10 @@ describe("recent incidents for the Feed tab", () => {
     const [first] = await listRecentIncidents();
 
     expect(Object.keys(first).sort()).toEqual(
-      ["address", "category", "createdAt", "id", "severity", "title"]
+      ["address", "category", "createdAt", "id", "latitude", "longitude", "severity", "title"]
     );
+    expect(first.latitude).toBe(base.latitude);
+    expect(first.longitude).toBe(base.longitude);
   });
 
   it("returns at most 50 incidents", async () => {

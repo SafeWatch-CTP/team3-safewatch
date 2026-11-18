@@ -1,13 +1,13 @@
 // The map and the feed share one read, so they load, fail and retry together.
 // page.tsx wraps this in a Suspense boundary (skeleton) and a
 // SectionErrorBoundary (retry card). States: docs/specs/incidents/incident-map.md.
-import { listActiveIncidents } from "@project/domain";
+import { listRecentIncidents } from "@project/domain";
 import { IncidentMapSection } from "./incident-map-section";
 import { incidentAnchorId } from "./incident-map-model";
 import { RefreshButton } from "./refresh-button";
 
 export async function IncidentFeed({ listId }: { listId: string }) {
-  const incidents = await listActiveIncidents();
+  const incidents = await listRecentIncidents();
 
   // Only what the map shows crosses to the client.
   const mapIncidents = incidents.map(

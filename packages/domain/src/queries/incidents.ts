@@ -148,6 +148,8 @@ export type RecentIncident = {
   severity: IncidentSeverity;
   category: IncidentCategory;
   address: string | null;
+  latitude: number;
+  longitude: number;
   createdAt: Date;
 };
 
@@ -165,6 +167,8 @@ export async function listRecentIncidents(
       severity: true,
       category: true,
       address: true,
+      latitude: true,
+      longitude: true,
       createdAt: true,
     },
     orderBy: [{ createdAt: "desc" }, { id: "desc" }],
