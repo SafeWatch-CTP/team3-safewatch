@@ -55,7 +55,7 @@ export async function IncidentFeed({ listId }: { listId: string }) {
                 key={incident.id}
                 id={incidentAnchorId(incident.id)}
                 href={`/incident_feed/${incident.id}`}
-                className="block rounded border border-neutral-200 bg-white p-4 text-inherit no-underline shadow-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+                className="block rounded border border-border bg-surface p-4 text-fg no-underline shadow-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
                 <div className="mb-2 flex items-center justify-between gap-4">
                   <h3 className="font-semibold">{incident.title}</h3>
