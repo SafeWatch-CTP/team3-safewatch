@@ -31,14 +31,14 @@ pointer doesn't lose anything.
 - `apps/web/app/_components/incident-map-model.ts`: pure helpers for the
   severity styles, pin names, labels and initial view
 - `apps/web/app/globals.css`: pin, focus-ring and popup styles
-- `packages/domain/src/queries/incidents.ts`: `listActiveIncidents` returns
-  `latitude` and `longitude` on each item
+- `packages/domain/src/queries/incidents.ts`: `listRecentIncidents` returns
+  the newest active incidents and their coordinates for the home page
 
 ## Behavior
 **Data**
 - The map shows exactly the incidents in the feed: the same
-  `listActiveIncidents()` call, the same items, in the same order. Each item
-  has `latitude` and `longitude`.
+  `listRecentIncidents()` call, the same newest-first items (up to 50), in the
+  same order. Each item has `latitude` and `longitude`.
 - The page sends the client only the fields the map uses: `id`, `title`,
   `severity`, `category`, `address`, `latitude` and `longitude`.
 
@@ -93,7 +93,8 @@ pointer doesn't lose anything.
 - Activating a pin opens a popup with the title as a heading, the severity,
   the category in plain words ("Severe weather", not `SEVERE_WEATHER`), the
   address (or "Address unavailable"), and a "Show in list" link to that
-  incident's feed card.
+  incident's home-page card. The card links to the incident detail page in
+  the Feed tab (`/incident_feed/<id>`).
 - When the popup opens, focus moves to its title. When the popup closes and
   focus was inside it (or nowhere), focus goes back to the pin that opened
   it.
@@ -111,7 +112,8 @@ pointer doesn't lose anything.
 | Enter or Space | pin | Opens the popup and moves focus to its title (Enter on an open pin closes it) |
 | Tab / Shift+Tab | inside popup | Move between "Show in list" and "Close popup" |
 | Escape | pin or inside popup | Closes the popup; focus goes back to the pin |
-| Enter | "Show in list" | Moves focus to that incident's card in the feed |
+| Enter | "Show in list" | Moves focus to that incident's home-page card |
+| Enter | Home-page incident card | Opens that incident's detail page in the Feed tab |
 
 Every focusable part of the map shows a visible focus ring. Leaflet's own
 link styles and focus handling are not relied on for this.
@@ -127,6 +129,7 @@ link styles and focus handling are not relied on for this.
 | Tab to a pin, press Space | Popup opens; screen reader says the title heading |
 | Press Escape in the popup | Popup closes; focus is back on the same pin |
 | Activate "Show in list" | The page scrolls to that card, and the card has focus |
+| Select a home-page incident card | Opens `/incident_feed/<id>` with that incident's details |
 | Tile server unreachable | Status message: tiles couldn't load and the list below has the same information |
 | JavaScript still loading | "Loading map…" placeholder; heading, key and skip link are already there |
 | Incidents still loading (Slow 4G) | Skeleton for the map and three cards; location picker already usable |
@@ -154,9 +157,9 @@ link styles and focus handling are not relied on for this.
     retry card appears; restart it and press "Try again".
 
 ## Constraints & decisions
-- The map uses `listActiveIncidents` (city-wide, at most 25 items, most
-  severe first), not the nearby route. That way it works on a fresh clone
-  without Upstash and always matches the list. Switching to
+- The map uses `listRecentIncidents` (city-wide, at most 50 items, newest
+  first), not the nearby route. That way it works on a fresh clone without
+  Upstash and matches the Feed tab. Switching to
   `/api/v1/incidents/nearby` around the user's location is a behavior change
   to this spec.
 - The list is the text alternative for the map. Information shown only on

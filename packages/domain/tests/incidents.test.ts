@@ -6,6 +6,7 @@ import {
   ListNearbyIncidentsSchema,
   GetIncidentByIdSchema,
   CreateIncidentSchema,
+  ListRecentIncidentsSchema,
 } from "../src/zod_schemas/incidents";
 
 describe("ListNearbyIncidentsSchema", () => {
@@ -90,5 +91,21 @@ describe("CreateIncidentSchema", () => {
     const result = CreateIncidentSchema.safeParse({ ...valid, message: "   " });
     expect(result.success).toBe(true);
     expect(result.data?.message).toBeUndefined();
+  });
+});
+
+describe("ListRecentIncidentsSchema", () => {
+  it("accepts a known category", () => {
+    expect(ListRecentIncidentsSchema.parse({ category: "FIRE" }).category).toBe("FIRE");
+  });
+
+  it("reads no category as the unfiltered feed", () => {
+    expect(ListRecentIncidentsSchema.parse({}).category).toBeUndefined();
+  });
+
+  it("drops an unknown, lowercase or repeated category instead of failing", () => {
+    expect(ListRecentIncidentsSchema.parse({ category: "BANANA" }).category).toBeUndefined();
+    expect(ListRecentIncidentsSchema.parse({ category: "fire" }).category).toBeUndefined();
+    expect(ListRecentIncidentsSchema.parse({ category: ["FIRE", "CRIME"] }).category).toBeUndefined();
   });
 });

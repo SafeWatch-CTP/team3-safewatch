@@ -4,6 +4,7 @@
 // etc.) by matching on message.type and calling handle functions.
 import { queueClient, decodeJobMessage, type JobMessage } from "@project/services";
 import { log } from "@project/log";
+import { startIngestLoop } from "./ingest/run";
 
 const POLL_MS = 2000;
 
@@ -15,6 +16,8 @@ async function main() {
   const q = queueClient();
   await q.createIfNotExists();
   log.info({ queue: q.name, pollMs: POLL_MS }, "worker started — waiting for jobs (Ctrl+C to stop)");
+
+  startIngestLoop();
 
   while (true) {
     const batch = await q.receiveMessages({ numberOfMessages: 10 });

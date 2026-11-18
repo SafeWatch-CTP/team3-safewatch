@@ -1,13 +1,13 @@
 // The map and the feed share one read, so they load, fail and retry together.
 // page.tsx wraps this in a Suspense boundary (skeleton) and a
 // SectionErrorBoundary (retry card). States: docs/specs/incidents/incident-map.md.
-import { listActiveIncidents } from "@project/domain";
+import { listRecentIncidents } from "@project/domain";
 import { IncidentMapSection } from "./incident-map-section";
 import { incidentAnchorId } from "./incident-map-model";
 import { RefreshButton } from "./refresh-button";
 
 export async function IncidentFeed({ listId }: { listId: string }) {
-  const incidents = await listActiveIncidents();
+  const incidents = await listRecentIncidents();
 
   // Only what the map shows crosses to the client.
   const mapIncidents = incidents.map(
@@ -50,12 +50,12 @@ export async function IncidentFeed({ listId }: { listId: string }) {
             </div>
           ) : (
             incidents.map((incident) => (
-              // tabIndex -1: a map popup's "Show in list" link moves focus here.
-              <article
+              // A map popup's "Show in list" link targets this incident card.
+              <a
                 key={incident.id}
                 id={incidentAnchorId(incident.id)}
-                tabIndex={-1}
-                className="rounded border border-border bg-surface p-4 shadow-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent"
+                href={`/incident_feed/${incident.id}`}
+                className="block rounded border border-border bg-surface p-4 text-fg no-underline shadow-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-accent"
               >
                 <div className="mb-2 flex items-center justify-between gap-4">
                   <h3 className="font-semibold">{incident.title}</h3>
@@ -68,7 +68,7 @@ export async function IncidentFeed({ listId }: { listId: string }) {
                   <p>{incident.address ?? "Location unavailable"}</p>
                   <p>{new Date(incident.createdAt).toLocaleString()}</p>
                 </div>
-              </article>
+              </a>
             ))
           )}
         </div>
