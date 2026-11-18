@@ -93,7 +93,8 @@ pointer doesn't lose anything.
 - Activating a pin opens a popup with the title as a heading, the severity,
   the category in plain words ("Severe weather", not `SEVERE_WEATHER`), the
   address (or "Address unavailable"), and a "Show in list" link to that
-  incident's feed card.
+  incident's home-page card. The card links to the incident detail page in
+  the Feed tab (`/incident_feed/<id>`).
 - When the popup opens, focus moves to its title. When the popup closes and
   focus was inside it (or nowhere), focus goes back to the pin that opened
   it.
@@ -111,7 +112,8 @@ pointer doesn't lose anything.
 | Enter or Space | pin | Opens the popup and moves focus to its title (Enter on an open pin closes it) |
 | Tab / Shift+Tab | inside popup | Move between "Show in list" and "Close popup" |
 | Escape | pin or inside popup | Closes the popup; focus goes back to the pin |
-| Enter | "Show in list" | Moves focus to that incident's card in the feed |
+| Enter | "Show in list" | Moves focus to that incident's home-page card |
+| Enter | Home-page incident card | Opens that incident's detail page in the Feed tab |
 
 Every focusable part of the map shows a visible focus ring. Leaflet's own
 link styles and focus handling are not relied on for this.
@@ -127,6 +129,7 @@ link styles and focus handling are not relied on for this.
 | Tab to a pin, press Space | Popup opens; screen reader says the title heading |
 | Press Escape in the popup | Popup closes; focus is back on the same pin |
 | Activate "Show in list" | The page scrolls to that card, and the card has focus |
+| Select a home-page incident card | Opens `/incident_feed/<id>` with that incident's details |
 | Tile server unreachable | Status message: tiles couldn't load and the list below has the same information |
 | JavaScript still loading | "Loading map…" placeholder; heading, key and skip link are already there |
 | Incidents still loading (Slow 4G) | Skeleton for the map and three cards; location picker already usable |

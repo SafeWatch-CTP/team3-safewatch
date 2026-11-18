@@ -50,12 +50,12 @@ export async function IncidentFeed({ listId }: { listId: string }) {
             </div>
           ) : (
             incidents.map((incident) => (
-              // tabIndex -1: a map popup's "Show in list" link moves focus here.
-              <article
+              // A map popup's "Show in list" link targets this incident card.
+              <a
                 key={incident.id}
                 id={incidentAnchorId(incident.id)}
-                tabIndex={-1}
-                className="rounded border border-neutral-200 bg-white p-4 shadow-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
+                href={`/incident_feed/${incident.id}`}
+                className="block rounded border border-neutral-200 bg-white p-4 text-inherit no-underline shadow-sm focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-neutral-900"
               >
                 <div className="mb-2 flex items-center justify-between gap-4">
                   <h3 className="font-semibold">{incident.title}</h3>
@@ -68,7 +68,7 @@ export async function IncidentFeed({ listId }: { listId: string }) {
                   <p>{incident.address ?? "Location unavailable"}</p>
                   <p>{new Date(incident.createdAt).toLocaleString()}</p>
                 </div>
-              </article>
+              </a>
             ))
           )}
         </div>
